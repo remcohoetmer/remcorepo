@@ -3,6 +3,8 @@ package nl.remco.remcoproject;
 import java.security.MessageDigest;
 
 public class Sha {
+	private int points;
+
 	public String sha256(String base) {
 		try{
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -19,5 +21,15 @@ public class Sha {
 		} catch(Exception ex){
 			throw new RuntimeException(ex);
 		}
+	}
+
+	public int getPoints() {
+		
+		return points;
+	}
+
+	public void setPoints(int p) {
+		points= p;
+		
 	}
 }
