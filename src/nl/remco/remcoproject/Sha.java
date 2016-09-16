@@ -1,13 +1,9 @@
+package nl.remco.remcoproject;
+
 import java.security.MessageDigest;
 
-public class Main {
-	public static void main (String[] args)
-	{
-		String encoded= sha256( "secret");
-		System.out.println("Encoded:"+ encoded);
-		//return 0;
-	}
-	public static String sha256(String base) {
+public class Sha {
+	public String sha256(String base) {
 		try{
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 			byte[] hash = digest.digest(base.getBytes("UTF-8"));
