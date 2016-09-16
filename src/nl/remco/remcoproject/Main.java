@@ -7,6 +7,7 @@ public class Main {
 		
 		String encoded= new Sha().sha256( "secret");
 		System.out.println("Encoded:"+ encoded);
+		fp.changePoints();
 		//return 0;
 	}
 
