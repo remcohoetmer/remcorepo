@@ -11,4 +11,8 @@ public class FilePlugin {
 		sha= new Sha();
 		sha.setPoints( 0);
 	}
+	private int start( String arg)
+	{
+		return 8;
+	}
 }
