@@ -2,10 +2,10 @@ package nl.remco.remcoproject;
 
 public class FilePlugin {
 	private Sha sha;
-	void changePoints( )
+	int changePoints( )
 	{
 		sha.setPoints( sha.getPoints() + 1);
-		start("This way");
+		return start("This way");
 	}
 	public FilePlugin()
 	{
