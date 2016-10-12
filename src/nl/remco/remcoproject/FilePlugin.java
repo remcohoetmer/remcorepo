@@ -5,6 +5,7 @@ public class FilePlugin {
 	void changePoints( )
 	{
 		sha.setPoints( sha.getPoints() + 1);
+		start("This way");
 	}
 	public FilePlugin()
 	{
