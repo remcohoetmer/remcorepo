@@ -1,4 +1,4 @@
-package nl.FlowBP;
+package nl.Flowable;
 
 import java.io.IOException;
 import java.util.Random;
@@ -10,7 +10,7 @@ import org.reactivestreams.Subscription;
 import io.reactivex.Flowable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import nl.FlowBP.BackPressure.SlowConsumer;
+import nl.Flowable.BackPressure.SlowConsumer;
 
 public class LazyFlowable 
 {

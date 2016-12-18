@@ -1,4 +1,4 @@
-package nl.FlowBP;
+package nl.Flowable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,8 +17,7 @@ public class GroupByExamples {
 		.flatMap(g -> getSublist(g))
 		.forEach(System.out::println);
 	}
-
-
+	
 	/* Probleem: 
 	 * Je wilt van de 2 lijsten de eerste 11 elementem. De rest wil je negeren. Oplossing de flatmap.
 	 * Maar: nadat de flatMap de waarden van de 1e observable heeft verwerkt (take()),

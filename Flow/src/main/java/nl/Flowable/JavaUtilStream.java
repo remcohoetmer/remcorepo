@@ -1,4 +1,4 @@
-package nl.FlowBP;
+package nl.Flowable;
 
 import java.util.Arrays;
 import java.util.Iterator;

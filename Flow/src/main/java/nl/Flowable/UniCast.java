@@ -1,4 +1,4 @@
-package nl.FlowBP;
+package nl.Flowable;
 
 import java.io.PrintStream;
 import java.util.concurrent.CountDownLatch;

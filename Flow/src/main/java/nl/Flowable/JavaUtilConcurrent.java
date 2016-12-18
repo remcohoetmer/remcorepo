@@ -1,4 +1,4 @@
-package nl.FlowBP;
+package nl.Flowable;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
