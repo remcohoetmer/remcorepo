@@ -18,12 +18,14 @@ public final class LimitOperator<T> implements ObservableOperator<T,T>{
 			Disposable parent;
 			boolean done;
 			int remaining;
+			boolean complete;
 			
 			@Override
 			public void onSubscribe(Disposable d) {
 				parent=d;
 				done= false;
 				remaining= limit;
+				complete=false;
 				if (remaining <=0) {
 					child.onComplete();
 					done= true;
@@ -37,9 +39,16 @@ public final class LimitOperator<T> implements ObservableOperator<T,T>{
 				if (!done) {
 					if (remaining>0) {
 						child.onNext(value);
+					} else {
+						//System.out.println( "value"+ value + "ignored");
 					}
 					if (--remaining ==0) {
 						child.onComplete();
+						complete= true;
+						// sneaky implementation that keeps on consuming while complete
+						// in order to refuse the values to be delivered to the flatmap.
+						// probably against the specs
+						// leads to infinite loops when used with an infinite source
 						done= true;
 						parent.dispose();
 						parent=null;
@@ -60,7 +69,9 @@ public final class LimitOperator<T> implements ObservableOperator<T,T>{
 			@Override
 			public void onComplete() {
 				if (!done) {
-					child.onComplete();
+					if (!complete) {
+						child.onComplete();
+					}
 					done= true;
 					parent.dispose();
 					parent=null;

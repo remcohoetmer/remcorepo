@@ -2,8 +2,8 @@ package nl.cerios.demo;
 
 import io.reactivex.Observable;
 
-public class LocationService {
-	public static LocationService locationService= new LocationService();
+public class LocationServiceRxJava {
+	public static LocationServiceRxJava locationService= new LocationServiceRxJava();
 	public LocationConfig retrieveLocationConfig( final Integer locationId) throws Exception
 	{
 		// long lasting task ...

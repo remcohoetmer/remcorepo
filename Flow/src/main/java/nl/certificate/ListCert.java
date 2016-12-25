@@ -34,7 +34,8 @@ public class ListCert {
 		for(TrustAnchor ta: params.getTrustAnchors() ) {
 			// Get certificate
 			X509Certificate cert = ta.getTrustedCert();
-			System.out.println(cert);
+			System.out.println(cert.getIssuerDN());
+			//System.out.println(cert.getIssuerDN());
 		}
 
 	}

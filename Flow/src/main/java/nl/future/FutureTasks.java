@@ -8,7 +8,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RecursiveTask;
 
-public class FutureCase {
+public class FutureTasks {
 
 
 	public static final void main(String[] args) throws InterruptedException, ExecutionException

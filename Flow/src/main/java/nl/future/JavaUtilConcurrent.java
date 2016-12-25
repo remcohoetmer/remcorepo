@@ -1,4 +1,4 @@
-package nl.Flowable;
+package nl.future;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +42,12 @@ public class JavaUtilConcurrent {
 		map.put("c3", "p0");
 		String result = map.reduce(1,
 				(key, value) -> {
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					System.out.println("Transform: " + Thread.currentThread().getName());
 					return key + "=" + value;
 				},
@@ -93,9 +99,10 @@ public class JavaUtilConcurrent {
 
 
 	public static void main(String[] args) throws InterruptedException {
-		new JavaUtilConcurrent().atomic();
+	//	new JavaUtilConcurrent().atomic();
 		System.out.println(ForkJoinPool.getCommonPoolParallelism());
-		new JavaUtilConcurrent().tomic();
+//		new JavaUtilConcurrent().tomic();
+		new JavaUtilConcurrent().concurrentHashMap();
 	}
 
 }

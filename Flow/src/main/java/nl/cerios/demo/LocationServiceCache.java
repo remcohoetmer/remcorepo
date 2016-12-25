@@ -1,6 +1,6 @@
 package nl.cerios.demo;
 
-import static nl.cerios.demo.LocationService.locationService;
+import static nl.cerios.demo.LocationServiceRxJava.locationService;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -10,7 +10,7 @@ import java.util.concurrent.FutureTask;
 import net.jcip.examples.LaunderThrowable;
 
 
-public class LocationService_3 {
+public class LocationServiceCache {
 	private ConcurrentHashMap<Integer, Future<LocationConfig>> cache=
 			new ConcurrentHashMap<>();
     

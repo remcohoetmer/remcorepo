@@ -1,4 +1,4 @@
-package nl.future;
+package nl.cerios.demo.completablefuture;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -10,8 +10,6 @@ import javax.servlet.http.HttpServletResponse;
 import nl.cerios.demo.CustomerData;
 import nl.cerios.demo.LocationConfig;
 import nl.cerios.demo.Request;
-import nl.cerios.demo.completablefuture.CustomerService;
-import nl.cerios.demo.completablefuture.LocationService;
 
 public class Completable {
 	class Message{}
@@ -119,7 +117,6 @@ public class Completable {
 
 	public static final void main(String[] args) throws Exception
 	{
-		//		new Completable().test();
 		new Completable().compose( null);
 	}
 }

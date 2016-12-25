@@ -10,7 +10,6 @@ import org.reactivestreams.Subscription;
 import io.reactivex.Flowable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import nl.Flowable.BackPressure.SlowConsumer;
 
 public class LazyFlowable 
 {
