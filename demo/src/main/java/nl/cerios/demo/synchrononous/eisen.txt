@@ -1,0 +1,22 @@
+
+Representatieve business applicatie:
+
+- veel info nodig, soms 100 DB calls voor afhandelen van requests
+
+- sterk evolutionair 
+
+
+
+Features:
+- caching --> mogelijk DB afhandeling, dus moet in een thread
+- error handling op elke plek
+- Iniyieel: veel statische data: locaties, locale, 
+
+
+- Business logica moet herkenbaar zijn
+- Scheduling moet configureerbaar zijn
+- Zoveel mogelijk standaard Java
+- Niet dominant framework
+	Het is natuurlijk  niet zo dat reactive niet zomaar een vinkje is wat je bij een bestaande applicatie aan kan zetten.
+
+	

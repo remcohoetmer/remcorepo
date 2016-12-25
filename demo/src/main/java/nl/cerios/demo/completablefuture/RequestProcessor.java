@@ -1,4 +1,4 @@
-package nl.future;
+package nl.cerios.demo.completablefuture;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -9,11 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import nl.cerios.demo.CustomerData;
 import nl.cerios.demo.LocationConfig;
-import nl.cerios.demo.completablefuture.CustomerService;
-import nl.cerios.demo.completablefuture.LocationService;
-import nl.cerios.demo.completablefuture.Request;
+import nl.cerios.demo.Request;
 
-public class Completable {
+public class RequestProcessor {
 	class Message{}
 
 	private String prepareSend(String i)
@@ -89,19 +87,19 @@ public class Completable {
 
 	LocationService locationService = new LocationService();
 	CustomerService customerService = new CustomerService();
-	Request request= new Request();
+
 	
 	
-	void compose(HttpServletResponse httpServletResponse) throws InterruptedException, ExecutionException
+	void compose(Request request, HttpServletResponse httpServletResponse) throws InterruptedException, ExecutionException
 	{
 		CompletableFuture<Message> msgAssember= 
 				CompletableFuture
 				.supplyAsync(this::assembleMsg);
-
+/*
 		CompletionStage<LocationConfig> locationConfig = locationService.getLocationConfig(request.getLocationId());
 		CompletionStage<CustomerData> customerData = customerService.getCustomerData( request.getCustomerId());
 		CompletionStage<CustomerData> exceptionstage = customerData.exceptionally( e-> handleCustomerError( e, httpServletResponse));
-
+*/
 
 		CompletableFuture
 		.supplyAsync(this::findReceiver)
@@ -119,7 +117,7 @@ public class Completable {
 
 	public static final void main(String[] args) throws Exception
 	{
-		//		new Completable().test();
-		new Completable().compose( null);
+		Request request= new Request();
+		new RequestProcessor().compose(request, null);
 	}
 }

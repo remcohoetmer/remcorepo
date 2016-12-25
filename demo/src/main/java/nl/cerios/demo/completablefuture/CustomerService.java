@@ -7,12 +7,16 @@ import nl.cerios.demo.CustomerData;
 
 public class CustomerService {
 
-	public CompletionStage<CustomerData> getCustomerData(Object customerId) {
+	public CompletionStage<CustomerData> getCustomerData(Integer customerId) {
 
 		return CompletableFuture.supplyAsync(()->
-		{throw new IllegalStateException();}
-		//new CustomerData(customerId)
+		{
+			if (customerId==0) {
 
+				throw new IllegalStateException();
+			} else 
+				return new CustomerData(customerId);
+		}
 				);
 	}
 }
