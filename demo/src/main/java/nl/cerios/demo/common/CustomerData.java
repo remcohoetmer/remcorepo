@@ -1,8 +1,15 @@
-package nl.cerios.demo;
+package nl.cerios.demo.common;
 
 public class CustomerData {
-
-	public CustomerData(Object customerId) {
+	private Integer customerId;
+	public Integer getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(Integer customerId) {
+		this.customerId = customerId;
+	}
+	public CustomerData(Integer customerId) {
+		this.customerId=customerId;
 	}
 
 }

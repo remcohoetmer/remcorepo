@@ -1,14 +1,12 @@
 package nl.cerios.demo.completablefuture;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
 import nl.cerios.demo.common.CustomerData;
-import nl.cerios.demo.common.LocationConfig;
 import nl.cerios.demo.http.HttpRequestData;
 
 public class RequestProcessor {
@@ -43,10 +41,6 @@ public class RequestProcessor {
 		}
 		return "";}
 				);
-	}
-	private String handleError(Throwable e)
-	{
-		return e.getMessage();
 	}
 
 	private String raiseError()
@@ -84,9 +78,6 @@ public class RequestProcessor {
 		task.thenAccept( t-> System.err.println( t));
 
 	}
-
-	LocationService locationService = new LocationService();
-	CustomerService customerService = new CustomerService();
 
 	
 	

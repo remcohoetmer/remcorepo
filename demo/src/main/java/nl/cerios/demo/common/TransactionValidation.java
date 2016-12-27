@@ -12,7 +12,7 @@ public class TransactionValidation {
 	}
 	
 	public String getMessage() {
-		return "Not money transferred yet";
+		return "Missing money transfer";
 	}
 
 }

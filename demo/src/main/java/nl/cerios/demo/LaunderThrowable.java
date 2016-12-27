@@ -18,7 +18,7 @@ public class LaunderThrowable {
             return (RuntimeException) t;
         else if (t instanceof Error)
             throw (Error) t;
-        else
+        else // wrap it
             throw new IllegalStateException("Not unchecked", t);
     }
 }

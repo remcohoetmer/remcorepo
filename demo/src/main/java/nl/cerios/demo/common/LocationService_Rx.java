@@ -2,15 +2,17 @@ package nl.cerios.demo.common;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import io.reactivex.Observable;
 
 
 public class LocationService_Rx {
+	private static final Logger LOG = Logger.getLogger(LocationService_Rx.class.getName());
 	private static ConcurrentHashMap<Integer, Observable<LocationConfig>> cache=
 			new ConcurrentHashMap<>();
 
-	public Observable<LocationConfig> getLocationConfig( final Integer locationId) throws InterruptedException
+	public Observable<LocationConfig> getLocationConfig( final Integer locationId)
 	{
 		Observable<LocationConfig> obs = cache.get(locationId);
 		if (obs == null) {
@@ -39,9 +41,9 @@ public class LocationService_Rx {
 		return obs;
 	}
 
-
 	private Observable<LocationConfig> retrieveLocationConfig( final Integer locationId)
 	{
+		LOG.info( "Obtain location "+ locationId);
 		// create new observable that will trigger DB request
 		// pull model: it will only start when subscribed
 		return Observable.just( new LocationConfig(locationId));

@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import nl.cerios.demo.common.PurchaseRequest;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
-import nl.cerios.demo.synchrononous.SyncPurchaseRequestProcessor;
+import nl.cerios.demo.synchrononous.PurchaseRequestProcessor_Sync;
 
 public class PurchaseHttpHandlerImpl implements Runnable, PurchaseHttpHandler {
 	private static final Logger LOG = Logger.getLogger(PurchaseHttpHandlerImpl.class.getName());
@@ -39,7 +39,7 @@ public class PurchaseHttpHandlerImpl implements Runnable, PurchaseHttpHandler {
 		HttpRequestData httpRequestData= new HttpRequestData();
 		httpRequestData.setPurchaseRequestId( purchaseRequestId);
 		
-		new SyncPurchaseRequestProcessor().handle( httpRequestData, this);
+		new PurchaseRequestProcessor_Sync().handle( httpRequestData, this);
 
 	}
 	
