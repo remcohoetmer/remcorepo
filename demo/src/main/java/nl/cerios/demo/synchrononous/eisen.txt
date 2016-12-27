@@ -8,9 +8,10 @@ Representatieve business applicatie:
 
 
 Features:
-- caching --> mogelijk DB afhandeling, dus moet in een thread
+- caching --> mogelijk DB afhandeling, dus moet reactive
+- 
 - error handling op elke plek
-- Iniyieel: veel statische data: locaties, locale, 
+- Initieel: veel statische data: locaties, locale, 
 
 
 - Business logica moet herkenbaar zijn

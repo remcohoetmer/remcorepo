@@ -3,7 +3,7 @@ package nl.cerios.demo.completablefuture;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import nl.cerios.demo.CustomerData;
+import nl.cerios.demo.common.CustomerData;
 
 public class CustomerService {
 

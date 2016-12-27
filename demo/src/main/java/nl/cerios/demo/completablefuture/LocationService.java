@@ -3,7 +3,7 @@ package nl.cerios.demo.completablefuture;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import nl.cerios.demo.LocationConfig;
+import nl.cerios.demo.common.LocationConfig;
 
 public class LocationService {
 	public CompletionStage<LocationConfig> getLocationConfig( final Integer locationId)

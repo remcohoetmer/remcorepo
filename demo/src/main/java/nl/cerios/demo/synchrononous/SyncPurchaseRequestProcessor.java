@@ -1,65 +1,62 @@
 package nl.cerios.demo.synchrononous;
-import javax.servlet.http.HttpServletResponse;
+import nl.cerios.demo.common.BaseProcessor;
+import nl.cerios.demo.common.CustomerData;
+import nl.cerios.demo.common.CustomerValidation;
+import nl.cerios.demo.common.LocationConfig;
+import nl.cerios.demo.common.OrderData;
+import nl.cerios.demo.common.PurchaseRequest;
+import nl.cerios.demo.common.Status;
+import nl.cerios.demo.common.TransactionValidation;
+import nl.cerios.demo.common.ValidationException;
+import nl.cerios.demo.http.HttpRequestData;
+import nl.cerios.demo.http.PurchaseHttpHandler;
 
-import nl.cerios.demo.CustomerData;
-import nl.cerios.demo.LocationConfig;
-import nl.cerios.demo.Request;
 
+public class SyncPurchaseRequestProcessor extends BaseProcessor {
 
-public class RequestProcessor {
-	LocationService locationService = new LocationService();
-	CustomerService customerService = new CustomerService();
-	PurchaseRequestService purchaseRequestService = new PurchaseRequestService();
-	TransactionService transactionService= new TransactionService();
-	void compose(Request request, HttpResponse httpResponse)
+	public void handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
-		
 		PurchaseRequest purchaseRequest;
 		try {		
-			purchaseRequest = purchaseRequestService.getPurchaseRequest( request.getPurchaseRequestId());
+			purchaseRequest = purchaseRequestService.getPurchaseRequest( requestData.getPurchaseRequestId());
 		} catch (ValidationException e) {
-			notifyError( e, httpResponse);
+			purchaseHandler.notifyValidationError( e.getMessage());
 			return;
 		}
 		CustomerData customerData;
 		try {		
 			customerData = customerService.getCustomerData( purchaseRequest.getCustomerId());
 		} catch (ValidationException e) {
-			notifyError( e, httpResponse);
+			purchaseHandler.notifyValidationError( e.getMessage());
 			return;
 		}
 
 		LocationConfig locationData = locationService.getLocationConfig(purchaseRequest.getLocationId());
 		// Now there is a customer, we can store it in the speed layer
-		PurchaseRequestPersister.store( purchaseRequest);
+		purchaseRequestController.store( purchaseRequest);
 		
 		CustomerValidation customerValidation = customerService.validateCustomer( customerData,locationData);
 		if (customerValidation.getStatus() != Status.OK) {
-			purchaseRequest.setValidationError( customerValidation);
-			notifyValidationError( purchaseRequest, httpResponse);
+			purchaseHandler.notifyValidationError( customerValidation.getMessage());
+			return;
 		}
 
 		TransactionValidation transactionValidation = transactionService.validate( purchaseRequest, customerData);
 		if (transactionValidation.getStatus() != Status.OK) {
-			purchaseRequest.setValidationError( transactionValidation);
-			notifyValidationError( purchaseRequest, httpResponse);
+			purchaseHandler.notifyValidationError( transactionValidation.getMessage());
 		}
-		/*
-		 * TODO:
-		orderPickingService.createOrderPickup( purchaseRequest);
-		orderTransportService.createOrderTransport( purchaseRequest);
-		*/
-		
-		
+
+		OrderData orderData= orderService.createOrder( purchaseRequest);
+		purchaseRequestController.update( purchaseRequest, orderData);
+
+		Status status= transactionService.linkOrderToTransaction( purchaseRequest);
+		if (status != Status.OK) {
+
+			// Payment and order OK, however: automatic linking failed --> manual 
+			mailboxHandler.sendMessage( composeLinkingFailedMessage( purchaseRequest));
+		}
+
+		purchaseHandler.notifyComplete( purchaseRequest);
 	}
-	private void notifyValidationError(PurchaseRequest purchaseRequest, HttpResponse httpResponse) {
-		
-	}
-	private void notifyError(ValidationException e, HttpResponse httpResponse) {
-		
-	}
-	public static final void main(String[] args) throws Exception
-	{
-		new RequestProcessor().compose( new Request(), null);
-	}
+
 }

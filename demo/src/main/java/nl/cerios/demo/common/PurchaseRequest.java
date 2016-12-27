@@ -1,29 +1,48 @@
-package nl.cerios.demo.synchrononous;
-
-import nl.cerios.demo.CustomerData;
-import nl.cerios.demo.LocationConfig;
+package nl.cerios.demo.common;
 
 public class PurchaseRequest {
+	Integer locationId;
+	Integer customerId;
+	Integer orderId;
+	Integer transactionId;
+	
+	public Integer getTransactionId() {
+		return transactionId;
+	}
+	public void setTransactionId(Integer transactionId) {
+		this.transactionId = transactionId;
+	}
+	public Integer getLocationId() {
+		return locationId;
+	}
+	public void setLocationId(Integer locationId) {
+		this.locationId = locationId;
+	}
+	public Integer getCustomerId() {
+		return customerId;
+	}
+	public void setCustomerId(Integer customerId) {
+		this.customerId = customerId;
+	}
+	public Integer getOrderId() {
+		return orderId;
+	}
+	public void setOrderId(Integer orderId) {
+		this.orderId = orderId;
+	}
+
 
 	public PurchaseRequest() {
 	}
 	public PurchaseRequest(CustomerData customerData, LocationConfig locationData) {
 	}
-
-	public Integer getLocationId() {
-		return 1;
-	}
-
-	public Integer getCustomerId() {
-		return 1;
-	}
-
-
-	public void setValidationError(CustomerValidation customerValidation) {
-		
-	}
-	public void setValidationError(TransactionValidation transactionValidation) {
-		
-	}
 	
+	@Override
+    public String toString() {
+		StringBuffer sb= new StringBuffer();
+		sb.append( " customerId ").append( customerId);
+		sb.append( " orderId ").append( orderId);
+		sb.append( " transactionId ").append( transactionId);
+		return sb.toString();
+	}
 }

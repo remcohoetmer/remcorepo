@@ -1,57 +1,58 @@
-package com.concretepage.servlet;
+package nl.cerios.demo.http.impl;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Date;
 import java.util.logging.Logger;
 
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class TestWorker implements Runnable {
-	private static final Logger LOG = Logger.getLogger(TestWorker.class.getName());
-	private final String name;
-	private final AsyncContext context;
-	private final Date queued;
+import nl.cerios.demo.common.PurchaseRequest;
+import nl.cerios.demo.http.HttpRequestData;
+import nl.cerios.demo.http.PurchaseHttpHandler;
+import nl.cerios.demo.synchrononous.SyncPurchaseRequestProcessor;
 
-	public TestWorker(String name, AsyncContext context) {
-		this.name = name;
+public class PurchaseHttpHandlerImpl implements Runnable, PurchaseHttpHandler {
+	private static final Logger LOG = Logger.getLogger(PurchaseHttpHandlerImpl.class.getName());
+	private final AsyncContext context;
+	private HttpServletRequest httpServletRequest;
+	@SuppressWarnings("unused")
+	private HttpServletResponse httpServletResponse;
+	String showMessage="";
+	
+	public PurchaseHttpHandlerImpl(AsyncContext context) {
 		this.context = context;
-		this.queued = new Date(System.currentTimeMillis());
 	}
 
 	@Override
 	public void run() {
-
-		LOG.info(">run: " + name);
-
-		/* do some work for 10 sec */
-		for (int i = 0; i < 10; i++) {
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
+		httpServletRequest = (HttpServletRequest) this.context.getRequest();
+		httpServletResponse = (HttpServletResponse) this.context.getResponse();		
+		final String purchaseRequestIdString= httpServletRequest.getParameter("purchaseRequestId");
+		LOG.info( "Message "+ purchaseRequestIdString);
+		
+		Integer purchaseRequestId;
+		if (purchaseRequestIdString!=null) {
+			purchaseRequestId= Integer.parseInt( purchaseRequestIdString);
+		} else {
+			throw new IllegalArgumentException( "No purchaseRequestId present");
 		}
+		HttpRequestData httpRequestData= new HttpRequestData();
+		httpRequestData.setPurchaseRequestId( purchaseRequestId);
+		
+		new SyncPurchaseRequestProcessor().handle( httpRequestData, this);
 
-		HttpServletResponse response = (HttpServletResponse) this.context.getResponse();
-		response.setContentType("text/plain");
+	}
+	
+	public void notifyValidationError(String string) {
+		httpServletRequest.setAttribute("purchaseRequest", null);
+		httpServletRequest.setAttribute("message", string);
+		context.dispatch("/purchase.jsp");
+	}
 
-		try {
-			PrintWriter out = response.getWriter();
-			out.println("Class:\t\t" + response.getClass());
-			out.println("Name:\t\t" + this.name);
-			out.println("Queued:\t\t" + this.queued);
-			out.println("End:\t\t" + new Date(System.currentTimeMillis()));
-			out.println("Thread:\t\t" + Thread.currentThread().getId());
-			out.flush();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-		this.context.complete();
-
-		LOG.info("<run: " + name);
+	public void notifyComplete(PurchaseRequest purchaseRequest)
+	{
+		httpServletRequest.setAttribute("purchaseRequest", purchaseRequest);
+		httpServletRequest.setAttribute("message", "");
+		context.dispatch("/purchase.jsp");
 	}
 }

@@ -7,9 +7,9 @@ import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import nl.cerios.demo.CustomerData;
-import nl.cerios.demo.LocationConfig;
-import nl.cerios.demo.Request;
+import nl.cerios.demo.common.CustomerData;
+import nl.cerios.demo.common.LocationConfig;
+import nl.cerios.demo.http.HttpRequestData;
 
 public class RequestProcessor {
 	class Message{}
@@ -90,7 +90,7 @@ public class RequestProcessor {
 
 	
 	
-	void compose(Request request, HttpServletResponse httpServletResponse) throws InterruptedException, ExecutionException
+	void compose(HttpRequestData request, HttpServletResponse httpServletResponse) throws InterruptedException, ExecutionException
 	{
 		CompletableFuture<Message> msgAssember= 
 				CompletableFuture
@@ -117,7 +117,7 @@ public class RequestProcessor {
 
 	public static final void main(String[] args) throws Exception
 	{
-		Request request= new Request();
+		HttpRequestData request= new HttpRequestData();
 		new RequestProcessor().compose(request, null);
 	}
 }

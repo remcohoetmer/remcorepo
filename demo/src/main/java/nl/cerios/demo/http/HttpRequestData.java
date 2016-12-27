@@ -1,9 +1,14 @@
-package nl.cerios.demo;
+package nl.cerios.demo.http;
 
-public class Request {
+public class HttpRequestData {
+	private Integer purchaseRequestId;
 
 	public Integer getPurchaseRequestId() {
-		return 1;
+		return purchaseRequestId;
+	}
+
+	public void setPurchaseRequestId(Integer purchaseRequestId) {
+		this.purchaseRequestId = purchaseRequestId;
 	}
 
 

@@ -1,9 +1,13 @@
-package nl.cerios.demo.synchrononous;
+package nl.cerios.demo.common;
 
-public class PurchaseRequestPersister {
+public class PurchaseRequestController {
 
-	public static void store(PurchaseRequest purchaseRequest) {
+	public void store(PurchaseRequest purchaseRequest) {
 		
+	}
+
+	public void update(PurchaseRequest purchaseRequest, OrderData orderData) {
+		purchaseRequest.setOrderId( orderData.getId());
 	}
 
 
