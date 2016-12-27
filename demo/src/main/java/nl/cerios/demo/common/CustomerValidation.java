@@ -1,8 +1,15 @@
 package nl.cerios.demo.common;
 
 public class CustomerValidation {
-	Status status= Status.OK;
+	Status status;
+	String message;
 	
+	public String getMessage() {
+		return message;
+	}
+	public void setMessage(String message) {
+		this.message = message;
+	}
 	public void setStatus(Status status) {
 		this.status = status;
 	}
@@ -11,8 +18,5 @@ public class CustomerValidation {
 		return status;
 	}
 
-	public String getMessage() {
-		return "Customer validation failed";
-	}
 
 }

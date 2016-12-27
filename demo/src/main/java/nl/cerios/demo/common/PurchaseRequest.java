@@ -1,11 +1,18 @@
 package nl.cerios.demo.common;
 
 public class PurchaseRequest {
+	Integer purchaseRequestId;
 	Integer locationId;
 	Integer customerId;
 	Integer orderId;
 	Integer transactionId;
 	
+	public Integer getPurchaseRequestId() {
+		return purchaseRequestId;
+	}
+	public void setPurchaseRequestId(Integer purchaseRequestId) {
+		this.purchaseRequestId = purchaseRequestId;
+	}
 	public Integer getTransactionId() {
 		return transactionId;
 	}

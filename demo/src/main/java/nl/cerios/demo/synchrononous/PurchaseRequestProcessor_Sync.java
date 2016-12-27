@@ -46,7 +46,7 @@ public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 			return;
 		}
 
-		TransactionValidation transactionValidation = transactionService.validate( purchaseRequest, customerData);
+		TransactionValidation transactionValidation = transactionService.validate_Sync( purchaseRequest, customerData);
 		if (transactionValidation.getStatus() != Status.OK) {
 			purchaseHandler.notifyValidationError( transactionValidation.getMessage());
 		}
@@ -54,7 +54,7 @@ public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 		OrderData orderData= orderService.createOrder( purchaseRequest);
 		purchaseRequestController.update( purchaseRequest, orderData);
 
-		Status status= transactionService.linkOrderToTransaction( purchaseRequest);
+		Status status= transactionService.linkOrderToTransaction_Sync( purchaseRequest);
 		if (status != Status.OK) {
 
 			// Payment and order OK, however: automatic linking failed --> manual 

@@ -15,6 +15,7 @@ public class LocationService_CF {
 	{
 		CompletableFuture<LocationConfig> f = cache.get(locationId);
         if (f == null) {
+        	// problem: the thread is already started!!
         	CompletableFuture<LocationConfig> futuretask = retrieveLocationConfig( locationId);
             return cache.putIfAbsent(locationId, futuretask);
         }

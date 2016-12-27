@@ -1,27 +1,37 @@
 package nl.cerios.demo.common;
 
+import static nl.cerios.demo.CF_Utils.transportException;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import io.reactivex.Observable;
-import nl.cerios.demo.LaunderThrowable;
-import nl.cerios.demo.Supplier_Ex;
-
 public class PurchaseRequestController {
+	private PurchaseRequestController(){}
+	private final static PurchaseRequestController purchaseRequestController= 
+			new PurchaseRequestController();
+	public static PurchaseRequestController getInstance() { return purchaseRequestController;}
+	
+	private Map<Integer,PurchaseRequest> purchaseRequests= new HashMap<>();
 
-	public void store(PurchaseRequest purchaseRequest) {	
+	public void add(Integer purchaseRequestId, PurchaseRequest purchaseRequest)
+	{
+		purchaseRequest.setPurchaseRequestId(purchaseRequestId);
+		purchaseRequests.put(purchaseRequestId, purchaseRequest);
+	}
+	
+	public void store(PurchaseRequest purchaseRequest) {
 	}
 
 	public void update(PurchaseRequest purchaseRequest, OrderData orderData) {
 		purchaseRequest.setOrderId( orderData.getId());
 	}
 
-	public PurchaseRequest getPurchaseRequest(Integer purchaseRequestId) throws ValidationException{
-		if (purchaseRequestId>0) {
-			PurchaseRequest purchaseRequest= new PurchaseRequest();
-			purchaseRequest.setCustomerId( 1);
-			purchaseRequest.setLocationId( 5);
-			return purchaseRequest;
+	public PurchaseRequest getPurchaseRequest(Integer purchaseRequestId) throws ValidationException
+	{
+		if (purchaseRequests.containsKey(purchaseRequestId)) {
+			return purchaseRequests.get(purchaseRequestId);
 		}
 		throw new ValidationException( "No purchase");
 	}
@@ -41,16 +51,5 @@ public class PurchaseRequestController {
 		return Observable.defer( ()-> Observable.just( getPurchaseRequest( purchaseRequestId)));
 	}
 
-	public<T> Supplier<T> transportException(Supplier_Ex<T> func) {
-		return new Supplier<T>() {
-			@Override
-			public T get() {
-				try {
-					return func.get();
-				} catch (Exception e) {
-					throw LaunderThrowable.launderThrowable(e);
-				}
-			}
-		};
-	}
+
 }
