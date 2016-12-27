@@ -1,36 +1,31 @@
-package nl.cerios.demo;
+package nl.cerios.demo.common;
 
-import static nl.cerios.demo.LocationServiceRxJava.locationService;
-
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.logging.Logger;
 
 
-public class LocationServiceCache {
-	private ConcurrentHashMap<Integer, Future<LocationConfig>> cache=
+public class LocationService_CF {
+	private static final Logger LOG = Logger.getLogger(LocationService_CF.class.getName());
+	private ConcurrentHashMap<Integer, CompletableFuture<LocationConfig>> cache=
 			new ConcurrentHashMap<>();
     
-	public LocationConfig getLocationConfig( final Integer locationId) throws InterruptedException
+	public CompletionStage<LocationConfig> getLocationConfig( final Integer locationId)
 	{
-        Future<LocationConfig> f = cache.get(locationId);
+		CompletableFuture<LocationConfig> f = cache.get(locationId);
         if (f == null) {
-            FutureTask<LocationConfig> futuretask = new FutureTask<LocationConfig>(
-            		()-> locationService.retrieveLocationConfig( locationId));
-            f = cache.putIfAbsent(locationId, futuretask);
-            if (f == null) { // the futuretask has been entered
-                f = futuretask;
-                futuretask.run();
-            } else {
-            	// the futuretask has not entered. f was the cached value
-            }
+        	CompletableFuture<LocationConfig> futuretask = retrieveLocationConfig( locationId);
+            return cache.putIfAbsent(locationId, futuretask);
         }
-        try {
-            return f.get();
-        } catch (ExecutionException e) {
-            throw LaunderThrowable.launderThrowable(e.getCause());
-        }
+        return f;
     }
-    
+
+	private CompletableFuture<LocationConfig> retrieveLocationConfig( final Integer locationId)
+	{
+		// create new observable that will trigger DB request
+		// pull model: it will only start when subscribed
+		LOG.info( "Obtain location "+ locationId);
+		return CompletableFuture.supplyAsync( ()->new LocationConfig(locationId));
+	}
 }

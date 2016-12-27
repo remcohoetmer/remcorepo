@@ -12,30 +12,35 @@ import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
 
 
-public class SyncPurchaseRequestProcessor extends BaseProcessor {
+public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 
 	public void handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
+
+		locationService_Sync.getLocationConfig( LocationConfig.DEFAULT);
+		locationService_Sync.getLocationConfig( LocationConfig.DEFAULT);
+
 		PurchaseRequest purchaseRequest;
 		try {		
-			purchaseRequest = purchaseRequestService.getPurchaseRequest( requestData.getPurchaseRequestId());
+			purchaseRequest = purchaseRequestController.getPurchaseRequest( requestData.getPurchaseRequestId());
 		} catch (ValidationException e) {
 			purchaseHandler.notifyValidationError( e.getMessage());
 			return;
 		}
 		CustomerData customerData;
 		try {		
-			customerData = customerService.getCustomerData( purchaseRequest.getCustomerId());
+			customerData = customerService.getCustomerData_Sync( purchaseRequest.getCustomerId());
 		} catch (ValidationException e) {
 			purchaseHandler.notifyValidationError( e.getMessage());
 			return;
 		}
 
-		LocationConfig locationData = locationService.getLocationConfig(purchaseRequest.getLocationId());
+		LocationConfig locationData= locationService_Sync.getLocationConfig(purchaseRequest.getLocationId());
+
 		// Now there is a customer, we can store it in the speed layer
 		purchaseRequestController.store( purchaseRequest);
 		
-		CustomerValidation customerValidation = customerService.validateCustomer( customerData,locationData);
+		CustomerValidation customerValidation = customerService.validateCustomer( customerData, locationData);
 		if (customerValidation.getStatus() != Status.OK) {
 			purchaseHandler.notifyValidationError( customerValidation.getMessage());
 			return;

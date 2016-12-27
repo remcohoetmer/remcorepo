@@ -1,15 +1,19 @@
-package nl.cerios.demo.synchrononous;
+package nl.cerios.demo.common;
 
-import nl.cerios.demo.CustomerData;
-import nl.cerios.demo.LocationConfig;
+import java.util.concurrent.CompletableFuture;
 
 public class CustomerService {
 
-	public CustomerData getCustomerData(Object customerId) throws ValidationException {
+	public CompletableFuture<CustomerData> getCustomerData_CF(Integer customerId) {
+
+		return CompletableFuture.supplyAsync( ()-> new CustomerData(customerId));
+	}
+	
+	public CustomerData getCustomerData_Sync(Integer customerId) throws ValidationException {
 
 		return new CustomerData(customerId);
 	}
-
+		
 	public CustomerValidation validateCustomer(CustomerData customerData, LocationConfig locationData) {
 		return new CustomerValidation();
 	}

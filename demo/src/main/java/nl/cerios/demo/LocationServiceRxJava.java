@@ -1,6 +1,7 @@
 package nl.cerios.demo;
 
 import io.reactivex.Observable;
+import nl.cerios.demo.common.LocationConfig;
 
 public class LocationServiceRxJava {
 	public static LocationServiceRxJava locationService= new LocationServiceRxJava();
