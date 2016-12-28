@@ -4,8 +4,10 @@ import io.reactivex.processors.ReplayProcessor;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
 import nl.cerios.demo.service.CustomerData;
+import nl.cerios.demo.service.CustomerValidation;
 import nl.cerios.demo.service.LocationConfig;
 import nl.cerios.demo.service.PurchaseRequest;
+import nl.cerios.demo.service.Status;
 import nl.cerios.demo.service.ValidationException;
 
 
@@ -14,39 +16,45 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 	public Flowable<CustomerData> handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
 
-		Flowable<PurchaseRequest> purchaseRequestObs = purchaseRequestController.getPurchaseRequest_Rx( requestData.getPurchaseRequestId());
-		purchaseRequestObs.onErrorResumeNext( (e) -> {
+		Flowable<PurchaseRequest> purchaseRequestObs = 
+				purchaseRequestController.getPurchaseRequest_Rx( requestData.getPurchaseRequestId())
+				.onErrorResumeNext( (e) -> {
+					if (e instanceof ValidationException) {
+						purchaseHandler.notifyValidationError( e.getMessage());
+					}
+					return Flowable.error( e);
+				});
+		ReplayProcessor<PurchaseRequest> purchaseRequestPublisher= ReplayProcessor.create();
+		purchaseRequestObs.subscribe( purchaseRequestPublisher);
+
+
+		Flowable<CustomerData> customerDataObs= customerService.getCustomerData_Rx( purchaseRequestPublisher
+				.map( purchaseRequest-> purchaseRequest.getCustomerId()));
+		customerDataObs.onErrorResumeNext( (e) -> {
 			if (e instanceof ValidationException) {
 				purchaseHandler.notifyValidationError( e.getMessage());
 			}
 			return Flowable.error( e);
 		});
-		ReplayProcessor<PurchaseRequest> purchaseRequestPublisher= ReplayProcessor.create();
-		purchaseRequestObs.subscribe( purchaseRequestPublisher);
 
+		Flowable<LocationConfig> locationDataObs= purchaseRequestPublisher
+				.map( purchaseRequest1-> purchaseRequest1.getLocationId())
+				.flatMap( locationId -> locationService_Rx.getLocationConfig(locationId));
 
-		Flowable<CustomerData> customerData= customerService.getCustomerData_Rx( purchaseRequestPublisher
-				.map( purchaseRequest-> purchaseRequest.getCustomerId()));
-		/*} catch (ValidationException e) {
-			purchaseHandler.notifyValidationError( e.getMessage());
-			return;
-		}*/
-		Flowable<Integer> locationIdObs= purchaseRequestPublisher
-				.map( purchaseRequest1-> purchaseRequest1.getLocationId());
+		Flowable<CustomerValidation> customerValidationObs= Flowable.zip( customerDataObs, locationDataObs,
+				(customerData, locationData) -> customerService.validateCustomer( customerData, locationData))
+				.map( customerValidation -> {
+					if (customerValidation.getStatus() != Status.OK) {
+						purchaseHandler.notifyValidationError( customerValidation.getMessage());
+						throw new ValidationException("Validation Error");
+					}
+					return customerValidation;
+				});
 
-		//Flowable<LocationConfig> locationDataObs= locationService_Rx.getLocationConfig(locationIdObs.blockingFirst());
-		return customerData;
-
+		return Flowable.merge( customerDataObs, customerValidationObs.flatMap( l->Flowable.empty()));
 		/*
 		// Now there is a customer, we can store it in the speed layer
 		purchaseRequestController.store( purchaseRequest);
-
-		CustomerValidation customerValidation = customerService.validateCustomer( customerData, locationData);
-		if (customerValidation.getStatus() != Status.OK) {
-			purchaseHandler.notifyValidationError( customerValidation.getMessage());
-			return;
-		}
-
 		TransactionValidation transactionValidation = transactionService.validate_Sync( purchaseRequest, customerData);
 		if (transactionValidation.getStatus() != Status.OK) {
 			purchaseHandler.notifyValidationError( transactionValidation.getMessage());
