@@ -1,6 +1,8 @@
-package nl.cerios.demo.processor;
+package nl.cerios.demo.synchrononous;
+
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
+import nl.cerios.demo.processor.BaseProcessor;
 import nl.cerios.demo.service.CustomerData;
 import nl.cerios.demo.service.CustomerValidation;
 import nl.cerios.demo.service.LocationConfig;

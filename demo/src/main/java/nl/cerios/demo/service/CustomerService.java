@@ -1,7 +1,8 @@
-package nl.cerios.demo.common;
+package nl.cerios.demo.service;
 
 import java.util.concurrent.CompletableFuture;
 
+import io.reactivex.Observable;
 import nl.cerios.demo.CF_Utils;
 
 public class CustomerService {
@@ -17,7 +18,7 @@ public class CustomerService {
 		validation.status= customerData.getCustomerId()==null?Status.NOT_OK:Status.OK;
 		switch (validation.status){
 		case NOT_OK: validation.setMessage("Customer validation failed"); break;
-		case OK: validation.setMessage("Customer validation failed");
+		case OK:     validation.setMessage("Customer OK");break;
 		}
 		return validation;
 	}
@@ -25,9 +26,17 @@ public class CustomerService {
 	public CompletableFuture<CustomerData> getCustomerData_CF(Integer customerId) {
 		return CompletableFuture.supplyAsync( CF_Utils.transportException( ()-> getCustomerData_Sync(customerId)));
 	}
+
 	public CompletableFuture<CustomerValidation> validateCustomer_CF(CustomerData customerData, LocationConfig locationData) {
 		return CompletableFuture.supplyAsync( ()-> validateCustomer(customerData, locationData));
 	}
-	
-}
 
+	public Observable<CustomerData> getCustomerData_Rx(Integer customerId) {
+		return Observable.defer( ()->Observable.just( getCustomerData_Sync(customerId)));
+	}
+
+	public Observable<CustomerValidation> validateCustomer_Rx(CustomerData customerData, LocationConfig locationData) {
+		return Observable.defer( ()->Observable.just( validateCustomer(customerData, locationData)));
+	}
+
+}

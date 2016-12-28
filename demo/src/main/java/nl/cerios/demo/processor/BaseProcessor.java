@@ -1,4 +1,14 @@
-package nl.cerios.demo.common;
+package nl.cerios.demo.processor;
+
+import nl.cerios.demo.service.CustomerService;
+import nl.cerios.demo.service.LocationService_CF;
+import nl.cerios.demo.service.LocationService_Rx;
+import nl.cerios.demo.service.LocationService_Sync;
+import nl.cerios.demo.service.MailboxHandler;
+import nl.cerios.demo.service.OrderService;
+import nl.cerios.demo.service.PurchaseRequest;
+import nl.cerios.demo.service.PurchaseRequestController;
+import nl.cerios.demo.service.TransactionService;
 
 public abstract class BaseProcessor {
 	protected LocationService_CF locationService_CF = new LocationService_CF();

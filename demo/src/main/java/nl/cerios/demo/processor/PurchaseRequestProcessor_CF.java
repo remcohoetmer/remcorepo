@@ -1,25 +1,36 @@
-package nl.cerios.demo.synchrononous;
+package nl.cerios.demo.processor;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiFunction;
 import java.util.function.Function;
-import nl.cerios.demo.common.BaseProcessor;
-import nl.cerios.demo.common.CustomerData;
-import nl.cerios.demo.common.CustomerValidation;
-import nl.cerios.demo.common.LocationConfig;
-import nl.cerios.demo.common.OrderData;
-import nl.cerios.demo.common.PurchaseRequest;
-import nl.cerios.demo.common.Status;
-import nl.cerios.demo.common.TransactionValidation;
-import nl.cerios.demo.common.ValidationException;
+
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
+import nl.cerios.demo.service.CustomerData;
+import nl.cerios.demo.service.CustomerValidation;
+import nl.cerios.demo.service.LocationConfig;
+import nl.cerios.demo.service.OrderData;
+import nl.cerios.demo.service.PurchaseRequest;
+import nl.cerios.demo.service.Status;
+import nl.cerios.demo.service.TransactionValidation;
+import nl.cerios.demo.service.ValidationException;
 
 
 public class PurchaseRequestProcessor_CF extends BaseProcessor {
 
-	<T> T handleCFException( Throwable e, Function<ValidationException, ? extends T> func){
-		if (e instanceof ValidationException) {
-			return func.apply( (ValidationException)e);	
+	<T> T handleCFException( Throwable e, Function<ValidationException, ? extends T> func)
+	{
+
+		if (e instanceof java.util.concurrent.CompletionException) {
+			e=e.getCause();
+		}
+		System.out.println("handleCFException "+ e + " "+ (e instanceof IllegalStateException));
+		if (e instanceof IllegalStateException
+				&& ((IllegalStateException)e).getCause()!= null
+				&& ((IllegalStateException)e).getCause() instanceof ValidationException) {
+			ValidationException ve= (ValidationException) ((IllegalStateException)e).getCause();
+			System.out.println("Obtained business exception: "+ ve);
+			return func.apply( ve);	
 		}
 		if (e instanceof RuntimeException) 
 			throw (RuntimeException)e;
@@ -28,7 +39,7 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 
 	public void handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
-		Function<Throwable,PurchaseRequest> validationExceptionHandlerPurchaseRequest = e-> handleCFException( e, f -> {
+		BiFunction<? super PurchaseRequest,Throwable,? extends PurchaseRequest> validationExceptionHandlerPurchaseRequest = (func,e)-> handleCFException( e, f -> {
 			purchaseHandler.notifyValidationError( f.getMessage());
 			return null;
 		});
@@ -44,14 +55,13 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 			purchaseHandler.notifyValidationError( f.getMessage());
 			return null;
 		});		
-		locationService_CF.getLocationConfig( LocationConfig.DEFAULT);
-		locationService_CF.getLocationConfig( LocationConfig.DEFAULT);
+
 
 		CompletableFuture<PurchaseRequest> purchaseRequestCF=
-				purchaseRequestController.getPurchaseRequest_CF( requestData.getPurchaseRequestId());
+				purchaseRequestController.getPurchaseRequest_CF( requestData.getPurchaseRequestId())
+		.handle( validationExceptionHandlerPurchaseRequest);
 
-		purchaseRequestCF.exceptionally( validationExceptionHandlerPurchaseRequest);
-
+		
 		CompletableFuture<CustomerData> customerDataCF= purchaseRequestCF.thenCompose((purchaseRequest) ->
 		customerService.getCustomerData_CF( purchaseRequest.getCustomerId())
 				);
@@ -60,26 +70,42 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 		CompletableFuture<LocationConfig> locationDataCF= purchaseRequestCF.thenCompose((purchaseRequest) ->
 		locationService_CF.getLocationConfig(purchaseRequest.getLocationId())
 				);
-		CompletableFuture<CompletableFuture<CustomerValidation>> customerValidationCF=customerDataCF.
-				thenCombineAsync(locationDataCF, 
-						(customerData, locationData)-> customerService.validateCustomer_CF( customerData, locationData));
+
+		class CustomerLocation {
+			CustomerData customerData;
+			LocationConfig locationData;
+			CustomerLocation ( CustomerData customerData, LocationConfig locationData){
+				this.customerData= customerData;
+				this.locationData=locationData;
+			}
+		}
+
+		CompletableFuture<CustomerLocation> customerValidationCF=customerDataCF.
+				thenCombine(locationDataCF, // combine async?
+						(customerData, locationData)-> new CustomerLocation(customerData, locationData));
+
+		CompletableFuture<CustomerValidation> customerValidationCF2=
+				customerValidationCF.thenCompose(
+						customerLocation -> 
+						customerService.validateCustomer_CF( customerLocation.customerData, customerLocation.locationData));
+
 
 		// het is niet mogelijk om switches te programmeren
-		CompletableFuture<CustomerValidation> customerValidationCF2=customerValidationCF.
+		CompletableFuture<CustomerValidation> customerValidationCF3=customerValidationCF2.
 				thenApplyAsync(  (customerValidation) ->
 				{ if (customerValidation.getStatus() != Status.OK)
 					throw new IllegalStateException(new ValidationException(customerValidation.getMessage())); 
-					else return customerValidation;});
-		CompletableFuture<CustomerValidation> customerValidationCF3= customerValidationCF2.exceptionally( validationExceptionHandlerCustomerValidation);
+				else return customerValidation;});
+		CompletableFuture<CustomerValidation> customerValidationCF4= customerValidationCF3.exceptionally( validationExceptionHandlerCustomerValidation);
 
 		// Synchronise
-		customerValidationCF3.join();
+		customerValidationCF4.join();
 		PurchaseRequest purchaseRequest;
 		CustomerData customerData;
 		try {
 			purchaseRequest = purchaseRequestCF.get();
 			customerData= customerDataCF.get();
-			}
+		}
 		catch (InterruptedException | ExecutionException e1) {
 			throw new RuntimeException(e1);
 		}

@@ -1,4 +1,4 @@
-package nl.cerios.demo.common;
+package nl.cerios.demo.service;
 
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;

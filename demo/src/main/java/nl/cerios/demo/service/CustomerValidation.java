@@ -1,4 +1,4 @@
-package nl.cerios.demo.common;
+package nl.cerios.demo.service;
 
 public class CustomerValidation {
 	Status status;

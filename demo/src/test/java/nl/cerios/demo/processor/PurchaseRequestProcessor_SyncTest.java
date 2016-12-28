@@ -1,4 +1,4 @@
-package nl.cerios.demo.synchrononous;
+package nl.cerios.demo.processor;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import nl.cerios.demo.DemoLogManager;
 import nl.cerios.demo.http.HttpRequestData;
+import nl.cerios.demo.processor.PurchaseRequestProcessor_Sync;
 
 
 public class PurchaseRequestProcessor_SyncTest extends PurchaseRequestProcessorTestBase {
@@ -13,7 +14,7 @@ public class PurchaseRequestProcessor_SyncTest extends PurchaseRequestProcessorT
 	@Before
 	public void setUp() throws Exception {
 		DemoLogManager.initialise();
-		addPurchaseRequest( 2, 2, 2);
+		addPurchaseRequest( 10, 10, 10);
 	}
 
 	@Test
@@ -27,7 +28,7 @@ public class PurchaseRequestProcessor_SyncTest extends PurchaseRequestProcessorT
 		new PurchaseRequestProcessor_Sync().handle( requestData, stub);
 		
 		
-		Assert.assertEquals( new Integer( 5), stub.purchaseRequest.getLocationId());
+		Assert.assertEquals( new Integer( 10), stub.purchaseRequest.getLocationId());
 	}
 
 }

@@ -1,4 +1,4 @@
-package nl.cerios.demo.common;
+package nl.cerios.demo.service;
 
 public class TransactionValidation {
 	Status status= Status.OK;

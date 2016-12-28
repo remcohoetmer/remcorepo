@@ -1,4 +1,4 @@
-package nl.cerios.demo.common;
+package nl.cerios.demo.service;
 
 import static nl.cerios.demo.CF_Utils.transportException;
 
@@ -28,15 +28,15 @@ public class PurchaseRequestController {
 		purchaseRequest.setOrderId( orderData.getId());
 	}
 
-	public PurchaseRequest getPurchaseRequest(Integer purchaseRequestId) throws ValidationException
+	private PurchaseRequest getPurchaseRequest(Integer purchaseRequestId) throws ValidationException
 	{
 		if (purchaseRequests.containsKey(purchaseRequestId)) {
 			return purchaseRequests.get(purchaseRequestId);
 		}
-		throw new ValidationException( "No purchase");
+		throw new ValidationException( "No purchase request");
 	}
 	
-	public PurchaseRequest getPurchaseRequestSync(Integer purchaseRequestId) throws ValidationException{
+	public PurchaseRequest getPurchaseRequest_Sync(Integer purchaseRequestId) throws ValidationException{
 		return getPurchaseRequest( purchaseRequestId);
 	}
 	

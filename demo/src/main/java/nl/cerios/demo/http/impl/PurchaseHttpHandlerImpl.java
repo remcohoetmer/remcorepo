@@ -6,10 +6,10 @@ import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import nl.cerios.demo.common.PurchaseRequest;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
-import nl.cerios.demo.synchrononous.PurchaseRequestProcessor_Sync;
+import nl.cerios.demo.processor.PurchaseRequestProcessor_Sync;
+import nl.cerios.demo.service.PurchaseRequest;
 
 public class PurchaseHttpHandlerImpl implements Runnable, PurchaseHttpHandler {
 	private static final Logger LOG = Logger.getLogger(PurchaseHttpHandlerImpl.class.getName());

@@ -1,4 +1,4 @@
-package nl.cerios.demo.common;
+package nl.cerios.demo.service;
 
 // Here we have the problem that the task does not retuen a value
 import java.util.concurrent.CompletableFuture;

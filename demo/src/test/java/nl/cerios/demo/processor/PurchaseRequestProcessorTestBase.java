@@ -1,16 +1,17 @@
-package nl.cerios.demo.synchrononous;
+package nl.cerios.demo.processor;
 
-import nl.cerios.demo.common.PurchaseRequest;
-import nl.cerios.demo.common.PurchaseRequestController;
 import nl.cerios.demo.http.PurchaseHttpHandler;
+import nl.cerios.demo.service.PurchaseRequest;
+import nl.cerios.demo.service.PurchaseRequestController;
 
 public abstract class PurchaseRequestProcessorTestBase
 {
 	static class PurchaseHttpHandlerStub implements PurchaseHttpHandler {
 		PurchaseRequest purchaseRequest;
-
+		String message;
 		@Override
 		public void notifyValidationError(String string) {
+			message= string;
 			System.out.println(string);
 		}
 
