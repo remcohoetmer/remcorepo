@@ -3,6 +3,7 @@ package nl.cerios.demo.service;
 import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 public class TransactionService {
 
@@ -28,11 +29,11 @@ public class TransactionService {
 		return CompletableFuture.supplyAsync( ()-> linkOrderToTransaction_Sync(purchaseRequest));
 	}
 
-	public Flowable<TransactionValidation> validate_Rx(PurchaseRequest purchaseRequest, CustomerData customerData) {
-		return Flowable.defer( ()->Flowable.just( validate_Sync(purchaseRequest, customerData)));
-
+	public Single<TransactionValidation> validate_Rx(PurchaseRequest purchaseRequest, CustomerData customerData) {
+		return Single.defer( ()->Single.just( validate_Sync(purchaseRequest, customerData)));
 	}
-	public Flowable<Status> linkOrderToTransaction_Rx(PurchaseRequest purchaseRequest) {
-		return Flowable.defer( ()->Flowable.just( linkOrderToTransaction_Sync(purchaseRequest)));
+	
+	public Single<Status> linkOrderToTransaction_Rx(PurchaseRequest purchaseRequest) {
+		return Single.defer( ()->Single.just( linkOrderToTransaction_Sync(purchaseRequest)));
 	}
 }

@@ -16,7 +16,6 @@ import nl.cerios.demo.service.LocationService_CF;
 public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTestBase {
 	@Before
 	public void setUp() throws Exception {
-		DemoLogManager.initialise();
 		addPurchaseRequest( 2, 2, 2);
 		addPurchaseRequest( 10, 10, 10);
 	}

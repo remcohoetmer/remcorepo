@@ -1,77 +1,97 @@
 package nl.cerios.demo.processor;
-import io.reactivex.Flowable;
-import io.reactivex.processors.ReplayProcessor;
+import java.util.Arrays;
+
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.internal.functions.Functions;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
 import nl.cerios.demo.service.CustomerData;
 import nl.cerios.demo.service.CustomerValidation;
 import nl.cerios.demo.service.LocationConfig;
+import nl.cerios.demo.service.OrderData;
 import nl.cerios.demo.service.PurchaseRequest;
 import nl.cerios.demo.service.Status;
+import nl.cerios.demo.service.TransactionValidation;
 import nl.cerios.demo.service.ValidationException;
 
 
 public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 
-	public Flowable<CustomerData> handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
+	public void handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
 
-		Flowable<PurchaseRequest> purchaseRequestObs = 
+		Single<PurchaseRequest> purchaseRequestSingle = 
 				purchaseRequestController.getPurchaseRequest_Rx( requestData.getPurchaseRequestId())
-				.onErrorResumeNext( (e) -> {
-					if (e instanceof ValidationException) {
-						purchaseHandler.notifyValidationError( e.getMessage());
+				.cache();
+
+		Single<CustomerData> customerDataSingle= customerService.getCustomerData_Rx(
+				purchaseRequestSingle
+				.map( purchaseRequest-> purchaseRequest.getCustomerId()))
+				.cache();
+
+		Single<LocationConfig> locationDataSingle= purchaseRequestSingle
+				.map( purchaseRequest1-> {
+					if (purchaseRequest1.getLocationId() == null) {
+						throw new ValidationException( "Invalid location");
 					}
-					return Flowable.error( e);
-				});
-		ReplayProcessor<PurchaseRequest> purchaseRequestPublisher= ReplayProcessor.create();
-		purchaseRequestObs.subscribe( purchaseRequestPublisher);
-
-
-		Flowable<CustomerData> customerDataObs= customerService.getCustomerData_Rx( purchaseRequestPublisher
-				.map( purchaseRequest-> purchaseRequest.getCustomerId()));
-		customerDataObs.onErrorResumeNext( (e) -> {
-			if (e instanceof ValidationException) {
-				purchaseHandler.notifyValidationError( e.getMessage());
-			}
-			return Flowable.error( e);
-		});
-
-		Flowable<LocationConfig> locationDataObs= purchaseRequestPublisher
-				.map( purchaseRequest1-> purchaseRequest1.getLocationId())
+					return purchaseRequest1.getLocationId();
+				})
 				.flatMap( locationId -> locationService_Rx.getLocationConfig(locationId));
 
-		Flowable<CustomerValidation> customerValidationObs= Flowable.zip( customerDataObs, locationDataObs,
-				(customerData, locationData) -> customerService.validateCustomer( customerData, locationData))
+		Single<CustomerValidation> customerValidationSingle=
+				Single.zip( customerDataSingle, locationDataSingle,
+						(customerData, locationData) -> customerService.validateCustomer_Rx( customerData, locationData))
+				.flatMap( Functions.identity())
 				.map( customerValidation -> {
 					if (customerValidation.getStatus() != Status.OK) {
-						purchaseHandler.notifyValidationError( customerValidation.getMessage());
-						throw new ValidationException("Validation Error");
+						throw new ValidationException( customerValidation.getMessage());
 					}
 					return customerValidation;
 				});
 
-		return Flowable.merge( customerDataObs, customerValidationObs.flatMap( l->Flowable.empty()));
-		/*
-		// Now there is a customer, we can store it in the speed layer
-		purchaseRequestController.store( purchaseRequest);
-		TransactionValidation transactionValidation = transactionService.validate_Sync( purchaseRequest, customerData);
-		if (transactionValidation.getStatus() != Status.OK) {
-			purchaseHandler.notifyValidationError( transactionValidation.getMessage());
-		}
+		Single<TransactionValidation> transactionValidationSingle= Single.zip( purchaseRequestSingle, customerDataSingle,
+				(purchaseRequest, customerData) -> transactionService.validate_Rx( purchaseRequest, customerData))
+				.flatMap( Functions.identity())
+				.map( transactionValidation -> {
+					if (transactionValidation.getStatus() != Status.OK) {
+						throw new ValidationException( transactionValidation.getMessage());
+					}
+					return transactionValidation;
+				});
 
-		OrderData orderData= orderService.createOrder( purchaseRequest);
-		purchaseRequestController.update( purchaseRequest, orderData);
+		Completable canBeOrdered= Completable.concat(Arrays.asList(
+				purchaseRequestSingle.toCompletable(),
+				transactionValidationSingle.toCompletable(),
+				customerValidationSingle.toCompletable())
+				);
 
-		Status status= transactionService.linkOrderToTransaction_Sync( purchaseRequest);
-		if (status != Status.OK) {
+		Single<OrderData> orderDataSingle= canBeOrdered.andThen(purchaseRequestSingle)
+				.flatMap(  orderService::createOrder_Rx);
 
-			// Payment and order OK, however: automatic linking failed --> manual 
-			mailboxHandler.sendMessage( composeLinkingFailedMessage( purchaseRequest));
-		}
+		Single<PurchaseRequest> purchaseRequestSingle2= Single.zip( purchaseRequestSingle, orderDataSingle,
+				(purchaseRequest, orderData) -> {
+					purchaseRequestController.update( purchaseRequest, orderData);
+					return purchaseRequest;});
 
-		purchaseHandler.notifyComplete( purchaseRequest);
-		 */
+		Single<PurchaseRequest> purchaseRequestSingle3= purchaseRequestSingle2
+				.flatMap( transactionService::linkOrderToTransaction_Rx)
+				.zipWith( purchaseRequestSingle, (status, purchaseRequest) -> { 
+					Completable res;
+					if (status != Status.OK) {
+						// Payment and order OK, however: automatic linking failed --> manual 
+						res= mailboxHandler.sendMessage_Rx( composeLinkingFailedMessage( purchaseRequest));
+					} else {
+						res= Completable.complete();
+					}
+					Single<PurchaseRequest> resultSingle= res.toSingleDefault(purchaseRequest);
+					return resultSingle;
+				})
+				.flatMap( Functions.identity());
+
+		purchaseRequestSingle3.subscribe(
+				purchaseRequest->purchaseHandler.notifyComplete( purchaseRequest),
+				throwable->purchaseHandler.notifyError( throwable) );
+
 	}
-
 }

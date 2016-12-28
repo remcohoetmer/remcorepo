@@ -3,6 +3,7 @@ package nl.cerios.demo.service;
 import java.util.concurrent.CompletableFuture;
 
 import io.reactivex.Flowable;
+import io.reactivex.Single;
 import nl.cerios.demo.CF_Utils;
 
 public class CustomerService {
@@ -15,8 +16,12 @@ public class CustomerService {
 		
 	public CustomerValidation validateCustomer(CustomerData customerData, LocationConfig locationData) {
 		CustomerValidation validation= new CustomerValidation();
-		validation.status= customerData.getCustomerId()==null?Status.NOT_OK:Status.OK;
-		switch (validation.status){
+		Status status= Status.OK;
+		if ( customerData.getCustomerId()!= locationData.getLocationId()) {
+			status= Status.NOT_OK;
+		}
+		validation.status= status;
+		switch (status){
 		case NOT_OK: validation.setMessage("Customer validation failed"); break;
 		case OK:     validation.setMessage("Customer OK");break;
 		}
@@ -31,12 +36,12 @@ public class CustomerService {
 		return CompletableFuture.supplyAsync( ()-> validateCustomer(customerData, locationData));
 	}
 
-	public Flowable<CustomerData> getCustomerData_Rx(Flowable<Integer> customerIdObs) {
+	public Single<CustomerData> getCustomerData_Rx(Single<Integer> customerIdObs) {
 		return customerIdObs.map( customerId -> getCustomerData_Sync(customerId));
 	}
 
-	public Flowable<CustomerValidation> validateCustomer_Rx(CustomerData customerData, LocationConfig locationData) {
-		return Flowable.defer( ()->Flowable.just( validateCustomer(customerData, locationData)));
+	public Single<CustomerValidation> validateCustomer_Rx(CustomerData customerData, LocationConfig locationData) {
+		return Single.defer( ()->Single.just( validateCustomer(customerData, locationData)));
 	}
 
 }

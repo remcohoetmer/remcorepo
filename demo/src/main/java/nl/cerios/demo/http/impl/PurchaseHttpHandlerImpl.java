@@ -44,9 +44,13 @@ public class PurchaseHttpHandlerImpl implements Runnable, PurchaseHttpHandler {
 
 	}
 	
-	public void notifyValidationError(String string) {
+	public void notifyError(Throwable exception) {
+		if (exception instanceof Error || exception instanceof RuntimeException) {
+			context.dispatch("/error.jsp");
+			return;
+		}
 		httpServletRequest.setAttribute("purchaseRequest", null);
-		httpServletRequest.setAttribute("message", string);
+		httpServletRequest.setAttribute("message", exception.getMessage());
 		context.dispatch("/purchase.jsp");
 	}
 

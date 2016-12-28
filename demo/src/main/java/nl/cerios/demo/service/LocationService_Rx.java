@@ -1,22 +1,21 @@
 package nl.cerios.demo.service;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 
 
 public class LocationService_Rx {
 	private static final Logger LOG = Logger.getLogger(LocationService_Rx.class.getName());
-	private static ConcurrentHashMap<Integer, Flowable<LocationConfig>> cache=
+	private static ConcurrentHashMap<Integer, Single<LocationConfig>> cache=
 			new ConcurrentHashMap<>();
 
-	public Flowable<LocationConfig> getLocationConfig( final Integer locationId)
+	public Single<LocationConfig> getLocationConfig( final Integer locationId) throws ValidationException
 	{
-		Flowable<LocationConfig> obs = cache.get(locationId);
+		Single<LocationConfig> obs = cache.get(locationId);
 		if (obs == null) {
-			Flowable<LocationConfig> new_obs= retrieveLocationConfig( locationId).cacheWithInitialCapacity(1);
+			Single<LocationConfig> new_obs= retrieveLocationConfig( locationId).cache();
 			obs = cache.putIfAbsent(locationId, new_obs);
 			if (obs==null) {
 				// there was no item in the cache
@@ -34,24 +33,11 @@ public class LocationService_Rx {
 		 */
 	}
 
-	/*
-	 * Alternative implementatie: er zit logica in de Flowable dat de cache na een seconde automatisch wordt geupdate
-	 */
-	public Flowable<LocationConfig> getLocationConfigAlternative( final Integer locationId)
-	{
-		Flowable<LocationConfig> obs = cache.get(locationId);
-		if (obs == null) {
-			Flowable<LocationConfig> new_obs= retrieveLocationConfig( locationId).replay(1, TimeUnit.SECONDS).autoConnect();
-			obs = cache.putIfAbsent(locationId, new_obs);
-		}
-		return obs;
-	}
-
-	private Flowable<LocationConfig> retrieveLocationConfig( final Integer locationId)
+	private Single<LocationConfig> retrieveLocationConfig( final Integer locationId)
 	{
 		LOG.info( "Obtain location "+ locationId);
 		// create new Flowable that will trigger DB request
 		// pull model: it will only start when subscribed
-		return Flowable.defer( ()->Flowable.just( new LocationConfig(locationId)));	
+		return Single.defer( ()->Single.just( new LocationConfig(locationId)));	
 	}
 }

@@ -12,4 +12,10 @@ public class LocationConfig {
 	{
 		return "config "+ locationId;
 	}
+	public Integer getLocationId() {
+		return locationId;
+	}
+	public void setLocationId(Integer locationId) {
+		this.locationId = locationId;
+	}
 }

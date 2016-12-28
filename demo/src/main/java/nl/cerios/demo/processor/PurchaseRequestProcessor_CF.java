@@ -42,19 +42,19 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 	public void handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
 		BiFunction<? super PurchaseRequest,Throwable,? extends PurchaseRequest> validationExceptionHandlerPurchaseRequest = (func,e)-> handleCFException( e, f -> {
-			purchaseHandler.notifyValidationError( f.getMessage());
+			purchaseHandler.notifyError( f);
 			return null;
 		});
 		Function<Throwable,CustomerData> validationExceptionHandlerCustomerData = e-> handleCFException( e, f -> {
-			purchaseHandler.notifyValidationError( f.getMessage());
+			purchaseHandler.notifyError( f);
 			return null;
 		});
 		Function<Throwable,CustomerValidation> validationExceptionHandlerCustomerValidation = e-> handleCFException( e, f -> {
-			purchaseHandler.notifyValidationError( f.getMessage());
+			purchaseHandler.notifyError( f);
 			return null;
 		});
 		Function<Throwable,TransactionValidation> validationExceptionHandlerTransactionValidation = e-> handleCFException( e, f -> {
-			purchaseHandler.notifyValidationError( f.getMessage());
+			purchaseHandler.notifyError( f);
 			return null;
 		});		
 
@@ -115,7 +115,7 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 
 		TransactionValidation transactionValidation = transactionService.validate_Sync( purchaseRequest, customerData);
 		if (transactionValidation.getStatus() != Status.OK) {
-			purchaseHandler.notifyValidationError( transactionValidation.getMessage());
+			purchaseHandler.notifyError( new ValidationException(transactionValidation.getMessage()));
 		}
 
 		OrderData orderData= orderService.createOrder( purchaseRequest);

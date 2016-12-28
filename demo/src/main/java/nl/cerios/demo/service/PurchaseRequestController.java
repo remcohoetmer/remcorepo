@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import io.reactivex.Flowable;
+import io.reactivex.Single;
 public class PurchaseRequestController {
 	private PurchaseRequestController(){}
 	private final static PurchaseRequestController purchaseRequestController= 
@@ -21,8 +21,6 @@ public class PurchaseRequestController {
 		purchaseRequests.put(purchaseRequestId, purchaseRequest);
 	}
 	
-	public void store(PurchaseRequest purchaseRequest) {
-	}
 
 	public void update(PurchaseRequest purchaseRequest, OrderData orderData) {
 		purchaseRequest.setOrderId( orderData.getId());
@@ -45,10 +43,10 @@ public class PurchaseRequestController {
 		return CompletableFuture.supplyAsync( transportException( ()-> getPurchaseRequest( purchaseRequestId)));
 	}
 
-	public Flowable<PurchaseRequest> getPurchaseRequest_Rx(final Integer purchaseRequestId)
+	public Single<PurchaseRequest> getPurchaseRequest_Rx(final Integer purchaseRequestId)
 	{
 		// postpone the computation of the value until request time, not build time
-		return Flowable.defer( ()-> Flowable.just( getPurchaseRequest( purchaseRequestId)));
+		return Single.defer( ()-> Single.just( getPurchaseRequest( purchaseRequestId)));
 	}
 
 

@@ -19,31 +19,28 @@ public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 		try {		
 			purchaseRequest = purchaseRequestController.getPurchaseRequest_Sync( requestData.getPurchaseRequestId());
 		} catch (ValidationException e) {
-			purchaseHandler.notifyValidationError( e.getMessage());
+			purchaseHandler.notifyError( e);
 			return;
 		}
 		CustomerData customerData;
 		try {		
 			customerData = customerService.getCustomerData_Sync( purchaseRequest.getCustomerId());
 		} catch (ValidationException e) {
-			purchaseHandler.notifyValidationError( e.getMessage());
+			purchaseHandler.notifyError( e);
 			return;
 		}
 
 		LocationConfig locationData= locationService_Sync.getLocationConfig(purchaseRequest.getLocationId());
 
-		// Now there is a customer, we can store it in the speed layer
-		purchaseRequestController.store( purchaseRequest);
-		
 		CustomerValidation customerValidation = customerService.validateCustomer( customerData, locationData);
 		if (customerValidation.getStatus() != Status.OK) {
-			purchaseHandler.notifyValidationError( customerValidation.getMessage());
+			purchaseHandler.notifyError( new ValidationException( customerValidation.getMessage()));
 			return;
 		}
 
 		TransactionValidation transactionValidation = transactionService.validate_Sync( purchaseRequest, customerData);
 		if (transactionValidation.getStatus() != Status.OK) {
-			purchaseHandler.notifyValidationError( transactionValidation.getMessage());
+			purchaseHandler.notifyError( new ValidationException( transactionValidation.getMessage()));
 		}
 
 		OrderData orderData= orderService.createOrder( purchaseRequest);

@@ -16,11 +16,11 @@ public class DemoLogManager {
 			LOGGER.log(Level.SEVERE, "Error in loading configuration",exception);
 		}
 	}
-	public static void initialise()
-	{
-		
-	}
+
 	public static void main(String[] args) {
 		LOGGER.fine("Fine message logged");
+	}
+
+	public static void initialise() {
 	}
 }

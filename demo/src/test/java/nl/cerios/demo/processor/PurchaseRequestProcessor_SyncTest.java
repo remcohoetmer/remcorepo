@@ -13,7 +13,6 @@ public class PurchaseRequestProcessor_SyncTest extends PurchaseRequestProcessorT
 
 	@Before
 	public void setUp() throws Exception {
-		DemoLogManager.initialise();
 		addPurchaseRequest( 10, 10, 10);
 	}
 

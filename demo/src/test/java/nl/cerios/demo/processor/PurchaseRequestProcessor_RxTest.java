@@ -1,25 +1,25 @@
 package nl.cerios.demo.processor;
+import java.util.logging.Logger;
 
-
-
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.reactivex.Flowable;
-import io.reactivex.subscribers.TestSubscriber;
 import nl.cerios.demo.DemoLogManager;
 import nl.cerios.demo.http.HttpRequestData;
-import nl.cerios.demo.service.CustomerData;
-import nl.cerios.demo.service.ValidationException;
+import nl.cerios.demo.http.impl.PurchaseHttpHandlerImpl;
 
 
 public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTestBase {
-
+	private static final Logger LOG = Logger.getLogger(PurchaseHttpHandlerImpl.class.getName());
 	@Before
 	public void setUp() throws Exception {
-		DemoLogManager.initialise();
 		addPurchaseRequest( 10, 10, 10);
+		addPurchaseRequest( 0, 0, null);
+		addPurchaseRequest( 13, 13, 15);
+		DemoLogManager.initialise();
+		
 	}
 
 	@Test
@@ -30,12 +30,9 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
 		
 		new PurchaseRequestProcessor_Rx().handle( requestData, stub);
-		Flowable<CustomerData> customerDataObs= new PurchaseRequestProcessor_Rx().handle( requestData, stub);
-
-		CustomerData customerData= customerDataObs.blockingFirst();
-		Assert.assertEquals( new Integer( 10), customerData.getCustomerId());
-
-		//	Assert.assertEquals( new Integer( 10), stub.purchaseRequest.getLocationId());
+		
+		
+		Assert.assertEquals( new Integer( 10), stub.purchaseRequest.getLocationId());
 	}
 	
 	@Test
@@ -45,13 +42,34 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		
 		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
 		
-		Flowable<CustomerData> customerDataObs= new PurchaseRequestProcessor_Rx().handle( requestData, stub);
-		TestSubscriber<CustomerData> ts= new TestSubscriber<>();
-		customerDataObs.subscribe( ts);
+		new PurchaseRequestProcessor_Rx().handle( requestData, stub);
 		
-		ts.assertError( new ValidationException("No purchase request"));
 		
-//		Assert.assertEquals( new Integer( 10), stub.purchaseRequest.getLocationId());
+		Assert.assertThat( stub.message, CoreMatchers.containsString( "No purchase request"));
 	}
-
+	
+	@Test
+	public void testInvalidLocation() {
+		HttpRequestData requestData= new HttpRequestData();
+		requestData.setPurchaseRequestId( 0);
+		
+		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
+		
+		new PurchaseRequestProcessor_Rx().handle( requestData, stub);
+		
+		
+		Assert.assertThat( stub.message, CoreMatchers.containsString( "Invalid location"));
+	}
+	@Test
+	public void testValidateCustomerFailed() {
+		HttpRequestData requestData= new HttpRequestData();
+		requestData.setPurchaseRequestId( 13);
+		
+		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
+		
+		new PurchaseRequestProcessor_Rx().handle( requestData, stub);
+		
+		
+		Assert.assertThat( stub.message, CoreMatchers.containsString( "Customer validation failed"));
+	}
 }
