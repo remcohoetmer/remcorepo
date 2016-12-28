@@ -3,7 +3,7 @@ package nl.cerios.demo.service;
 // Here we have the problem that the task does not retuen a value
 import java.util.concurrent.CompletableFuture;
 
-import io.reactivex.Observable;
+import io.reactivex.Flowable;
 
 public class MailboxHandler {
 
@@ -16,10 +16,10 @@ public class MailboxHandler {
 		return CompletableFuture.supplyAsync( ()-> { sendMessage( message); return new Object();});
 	}
 	
-	// Observable never emits a value, only issues complete when completed
-	public Observable<Object> sendMessage_Rx(String message)
+	// Flowable never emits a value, only issues complete when completed
+	public Flowable<Object> sendMessage_Rx(String message)
 	{
-		return Observable.generate( (consumer)-> {
+		return Flowable.generate( (consumer)-> {
 				sendMessage( message);
 				consumer.onComplete(); });
 	}

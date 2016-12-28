@@ -1,40 +1,46 @@
 package nl.cerios.demo.processor;
+import io.reactivex.Flowable;
+import io.reactivex.processors.ReplayProcessor;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
 import nl.cerios.demo.service.CustomerData;
-import nl.cerios.demo.service.CustomerValidation;
 import nl.cerios.demo.service.LocationConfig;
-import nl.cerios.demo.service.OrderData;
 import nl.cerios.demo.service.PurchaseRequest;
-import nl.cerios.demo.service.Status;
-import nl.cerios.demo.service.TransactionValidation;
 import nl.cerios.demo.service.ValidationException;
 
 
-public class PurchaseRequestProcessor_Sync extends BaseProcessor {
+public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 
-	public void handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
+	public Flowable<CustomerData> handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
-		PurchaseRequest purchaseRequest;
-		try {		
-			purchaseRequest = purchaseRequestController.getPurchaseRequest_Sync( requestData.getPurchaseRequestId());
-		} catch (ValidationException e) {
+
+		Flowable<PurchaseRequest> purchaseRequestObs = purchaseRequestController.getPurchaseRequest_Rx( requestData.getPurchaseRequestId());
+		purchaseRequestObs.onErrorResumeNext( (e) -> {
+			if (e instanceof ValidationException) {
+				purchaseHandler.notifyValidationError( e.getMessage());
+			}
+			return Flowable.error( e);
+		});
+		ReplayProcessor<PurchaseRequest> purchaseRequestPublisher= ReplayProcessor.create();
+		purchaseRequestObs.subscribe( purchaseRequestPublisher);
+
+
+		Flowable<CustomerData> customerData= customerService.getCustomerData_Rx( purchaseRequestPublisher
+				.map( purchaseRequest-> purchaseRequest.getCustomerId()));
+		/*} catch (ValidationException e) {
 			purchaseHandler.notifyValidationError( e.getMessage());
 			return;
-		}
-		CustomerData customerData;
-		try {		
-			customerData = customerService.getCustomerData_Sync( purchaseRequest.getCustomerId());
-		} catch (ValidationException e) {
-			purchaseHandler.notifyValidationError( e.getMessage());
-			return;
-		}
+		}*/
+		Flowable<Integer> locationIdObs= purchaseRequestPublisher
+				.map( purchaseRequest1-> purchaseRequest1.getLocationId());
 
-		LocationConfig locationData= locationService_Sync.getLocationConfig(purchaseRequest.getLocationId());
+		//Flowable<LocationConfig> locationDataObs= locationService_Rx.getLocationConfig(locationIdObs.blockingFirst());
+		return customerData;
 
+		/*
 		// Now there is a customer, we can store it in the speed layer
 		purchaseRequestController.store( purchaseRequest);
-		
+
 		CustomerValidation customerValidation = customerService.validateCustomer( customerData, locationData);
 		if (customerValidation.getStatus() != Status.OK) {
 			purchaseHandler.notifyValidationError( customerValidation.getMessage());
@@ -57,6 +63,7 @@ public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 		}
 
 		purchaseHandler.notifyComplete( purchaseRequest);
+		 */
 	}
 
 }

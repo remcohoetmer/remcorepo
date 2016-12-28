@@ -2,7 +2,7 @@ package nl.cerios.demo.service;
 
 import java.util.concurrent.CompletableFuture;
 
-import io.reactivex.Observable;
+import io.reactivex.Flowable;
 
 public class OrderService {
 
@@ -14,7 +14,7 @@ public class OrderService {
 		return CompletableFuture.supplyAsync( ()-> createOrder(purchaseRequest));
 	}
 
-	public Observable<OrderData> createOrder_Rx(PurchaseRequest purchaseRequest) {
-		return Observable.defer( ()->Observable.just( createOrder(purchaseRequest)));
+	public Flowable<OrderData> createOrder_Rx(PurchaseRequest purchaseRequest) {
+		return Flowable.defer( ()->Flowable.just( createOrder(purchaseRequest)));
 	}
 }

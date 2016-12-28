@@ -2,7 +2,7 @@ package nl.cerios.demo.service;
 
 import java.util.concurrent.CompletableFuture;
 
-import io.reactivex.Observable;
+import io.reactivex.Flowable;
 import nl.cerios.demo.CF_Utils;
 
 public class CustomerService {
@@ -31,12 +31,12 @@ public class CustomerService {
 		return CompletableFuture.supplyAsync( ()-> validateCustomer(customerData, locationData));
 	}
 
-	public Observable<CustomerData> getCustomerData_Rx(Integer customerId) {
-		return Observable.defer( ()->Observable.just( getCustomerData_Sync(customerId)));
+	public Flowable<CustomerData> getCustomerData_Rx(Flowable<Integer> customerIdObs) {
+		return customerIdObs.map( customerId -> getCustomerData_Sync(customerId));
 	}
 
-	public Observable<CustomerValidation> validateCustomer_Rx(CustomerData customerData, LocationConfig locationData) {
-		return Observable.defer( ()->Observable.just( validateCustomer(customerData, locationData)));
+	public Flowable<CustomerValidation> validateCustomer_Rx(CustomerData customerData, LocationConfig locationData) {
+		return Flowable.defer( ()->Flowable.just( validateCustomer(customerData, locationData)));
 	}
 
 }
