@@ -20,6 +20,5 @@ public class LaunderThrowable {
             throw (Error) t;
         else // wrap it
         	return new IllegalStateException("Wrap checked exception", t);
-
     }
 }

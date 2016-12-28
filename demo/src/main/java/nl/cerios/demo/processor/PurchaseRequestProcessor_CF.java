@@ -3,9 +3,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
+import nl.cerios.demo.http.impl.HttpEventHandler;
 import nl.cerios.demo.service.CustomerData;
 import nl.cerios.demo.service.CustomerValidation;
 import nl.cerios.demo.service.LocationConfig;
@@ -17,19 +19,19 @@ import nl.cerios.demo.service.ValidationException;
 
 
 public class PurchaseRequestProcessor_CF extends BaseProcessor {
-
+	private static final Logger LOG = Logger.getLogger(PurchaseRequestProcessor_CF.class.getName());
+	
 	<T> T handleCFException( Throwable e, Function<ValidationException, ? extends T> func)
 	{
-
 		if (e instanceof java.util.concurrent.CompletionException) {
 			e=e.getCause();
 		}
-		System.out.println("handleCFException "+ e + " "+ (e instanceof IllegalStateException));
+		LOG.info("handleCFException "+ e);
 		if (e instanceof IllegalStateException
 				&& ((IllegalStateException)e).getCause()!= null
 				&& ((IllegalStateException)e).getCause() instanceof ValidationException) {
 			ValidationException ve= (ValidationException) ((IllegalStateException)e).getCause();
-			System.out.println("Obtained business exception: "+ ve);
+			LOG.info("Obtained business exception: "+ ve);
 			return func.apply( ve);	
 		}
 		if (e instanceof RuntimeException) 

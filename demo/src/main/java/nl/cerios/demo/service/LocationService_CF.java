@@ -3,7 +3,6 @@ package nl.cerios.demo.service;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Logger;
 
 
@@ -14,22 +13,26 @@ public class LocationService_CF {
     
 	public CompletionStage<LocationConfig> getLocationConfig( final Integer locationId)
 	{
-		//CompletableFuture<LocationConfig> f = cache.get(locationId);
-        //if (f == null) {
-        	// problem: the thread is already started!!
-        	CompletableFuture<LocationConfig> futuretask = retrieveLocationConfig( locationId);
+		CompletableFuture<LocationConfig> f = cache.get(locationId);
+        if (f == null) {
+			// problem: if we create a CompletableFuture, the thread starts automatically
+			// solution: we create a trigger task on which the data retrieval is dependent on
+			CompletableFuture<LocationConfig> trigger = new CompletableFuture<>();
+			CompletableFuture<LocationConfig> futuretask= trigger.thenCompose((l)->retrieveLocationConfig(locationId));
         	CompletableFuture<LocationConfig> futuretask2= cache.putIfAbsent(locationId, futuretask);
         	if (futuretask2==null) {
         		// the new task is put into the cache
         		// start futuretask
+            	trigger.complete( null);//
         		return futuretask;
         	} else {
+        		// there was already a task in the cash, the newly created tasks must be cancelled
+        		trigger.cancel(true);
         		futuretask.cancel(true);
-        		// there
         		return futuretask2;
         	}
-        //}
-        //return f;
+        }
+        return f;
     }
 
 	private CompletableFuture<LocationConfig> retrieveLocationConfig( final Integer locationId)
@@ -37,6 +40,6 @@ public class LocationService_CF {
 		// create new observable that will trigger DB request
 		// pull model: it will only start when subscribed
 		LOG.info( "Obtain location "+ locationId);
-		return CompletableFuture.supplyAsync( ()->new LocationConfig(locationId), new ScheduledThreadPoolExecutor(2));
+		return CompletableFuture.supplyAsync( ()->new LocationConfig(locationId));
 	}
 }

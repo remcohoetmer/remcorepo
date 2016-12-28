@@ -27,7 +27,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 	{
 		LocationService_CF locationService_CF = new LocationService_CF();
 		locationService_CF.getLocationConfig( LocationConfig.DEFAULT);
-		locationService_CF.getLocationConfig( LocationConfig.DEFAULT);
+		locationService_CF.getLocationConfig( LocationConfig.DEFAULT).thenAccept(System.out::println); 
 	}
 
 	@Test
