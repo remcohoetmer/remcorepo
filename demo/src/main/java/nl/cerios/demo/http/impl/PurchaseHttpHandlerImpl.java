@@ -11,6 +11,7 @@ import nl.cerios.demo.http.PurchaseHttpHandler;
 import nl.cerios.demo.processor.PurchaseRequestProcessor_Sync;
 import nl.cerios.demo.service.PurchaseRequest;
 
+
 public class PurchaseHttpHandlerImpl implements Runnable, PurchaseHttpHandler {
 	private static final Logger LOG = Logger.getLogger(PurchaseHttpHandlerImpl.class.getName());
 	private final AsyncContext context;
