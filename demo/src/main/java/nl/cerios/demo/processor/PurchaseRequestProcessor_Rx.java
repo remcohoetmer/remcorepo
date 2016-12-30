@@ -1,11 +1,9 @@
 package nl.cerios.demo.processor;
-import java.util.Arrays;
-
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.internal.functions.Functions;
+import io.reactivex.schedulers.Schedulers;
 import nl.cerios.demo.http.HttpRequestData;
-import nl.cerios.demo.http.PurchaseHttpHandler;
 import nl.cerios.demo.service.CustomerData;
 import nl.cerios.demo.service.CustomerValidation;
 import nl.cerios.demo.service.LocationConfig;
@@ -18,9 +16,8 @@ import nl.cerios.demo.service.ValidationException;
 
 public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 
-	public void handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
+	public Single<PurchaseRequest> handle(HttpRequestData requestData)
 	{
-
 		Single<PurchaseRequest> purchaseRequestSingle = 
 				purchaseRequestController.getPurchaseRequest_Rx( requestData.getPurchaseRequestId())
 				.cache();
@@ -50,23 +47,20 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 					return customerValidation;
 				});
 
-		Single<TransactionValidation> transactionValidationSingle= Single.zip( purchaseRequestSingle, customerDataSingle,
-				(purchaseRequest, customerData) -> transactionService.validate_Rx( purchaseRequest, customerData))
-				.flatMap( Functions.identity())
-				.map( transactionValidation -> {
-					if (transactionValidation.getStatus() != Status.OK) {
-						throw new ValidationException( transactionValidation.getMessage());
-					}
-					return transactionValidation;
-				});
+		Single<TransactionValidation> transactionValidationSingle=
+				customerValidationSingle.toCompletable().andThen(
+						Single.zip( purchaseRequestSingle, customerDataSingle,
+								(purchaseRequest, customerData) -> transactionService.validate_Rx( purchaseRequest, customerData))
+						.flatMap( Functions.identity())
+						.map( transactionValidation -> {
+							if (transactionValidation.getStatus() != Status.OK) {
+								throw new ValidationException( transactionValidation.getMessage());
+							}
+							return transactionValidation;
+						}));
 
-		Completable canBeOrdered= Completable.concat(Arrays.asList(
-				purchaseRequestSingle.toCompletable(),
-				transactionValidationSingle.toCompletable(),
-				customerValidationSingle.toCompletable())
-				);
-
-		Single<OrderData> orderDataSingle= canBeOrdered.andThen(purchaseRequestSingle)
+		Single<OrderData> orderDataSingle= transactionValidationSingle.toCompletable()
+				.andThen(purchaseRequestSingle)
 				.flatMap(  orderService::createOrder_Rx);
 
 		Single<PurchaseRequest> purchaseRequestSingle2= Single.zip( purchaseRequestSingle, orderDataSingle,
@@ -89,9 +83,7 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 				})
 				.flatMap( Functions.identity());
 
-		purchaseRequestSingle3.subscribe(
-				purchaseRequest->purchaseHandler.notifyComplete( purchaseRequest),
-				throwable->purchaseHandler.notifyError( throwable) );
+		return purchaseRequestSingle3;
 
 	}
 }

@@ -7,7 +7,9 @@ import io.reactivex.Single;
 public class OrderService {
 
 	public OrderData createOrder(PurchaseRequest purchaseRequest) {
-		return new OrderData();
+		OrderData orderData= new OrderData();
+		orderData.setId( 90);
+		return orderData;
 	}
 	
 	public CompletableFuture<OrderData> createOrder_CF(PurchaseRequest purchaseRequest) {

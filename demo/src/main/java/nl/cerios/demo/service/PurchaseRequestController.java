@@ -5,9 +5,12 @@ import static nl.cerios.demo.CF_Utils.transportException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 import io.reactivex.Single;
 public class PurchaseRequestController {
+	private static final Logger LOG = Logger.getLogger(PurchaseRequestController.class.getName());
+	
 	private PurchaseRequestController(){}
 	private final static PurchaseRequestController purchaseRequestController= 
 			new PurchaseRequestController();
@@ -28,6 +31,8 @@ public class PurchaseRequestController {
 
 	private PurchaseRequest getPurchaseRequest(Integer purchaseRequestId) throws ValidationException
 	{
+		LOG.info( Thread.currentThread().getName());
+		new Exception().printStackTrace();
 		if (purchaseRequests.containsKey(purchaseRequestId)) {
 			return purchaseRequests.get(purchaseRequestId);
 		}
