@@ -44,8 +44,8 @@ public class CustomerService {
 		return CompletableFuture.supplyAsync( ()-> validateCustomer(customerData, locationData));
 	}
 
-	public Single<CustomerData> getCustomerData_Rx(Single<Integer> customerIdObs) {
-		return customerIdObs.map( this::getCustomerData_Sync);
+	public Single<CustomerData> getCustomerData_Rx(Integer customerId) {
+		return Single.defer( ()->Single.just( getCustomerData_Sync(customerId))); 
 	}
 
 	public Single<CustomerValidation> validateCustomer_Rx(CustomerData customerData, LocationConfig locationData) {

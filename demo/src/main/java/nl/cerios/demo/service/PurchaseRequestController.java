@@ -27,9 +27,6 @@ public class PurchaseRequestController {
 	public void update(PurchaseRequest purchaseRequest, OrderData orderData) {
 		purchaseRequest.setOrderId( orderData.getId());
 	}
-
-	
-	
 	
 	private PurchaseRequest getPurchaseRequest(Integer purchaseRequestId) throws ValidationException
 	{
