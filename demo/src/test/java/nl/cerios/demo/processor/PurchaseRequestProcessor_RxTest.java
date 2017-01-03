@@ -8,17 +8,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import nl.cerios.demo.DemoLogManager;
 import nl.cerios.demo.http.HttpRequestData;
-import nl.cerios.demo.http.impl.PurchaseHttpHandlerImpl;
 import nl.cerios.demo.service.PurchaseRequest;
 import nl.cerios.demo.service.ValidationException;
 
 
 public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTestBase {
-	private static final Logger LOG = Logger.getLogger(PurchaseHttpHandlerImpl.class.getName());
+	private static final Logger LOG = Logger.getLogger(PurchaseRequestProcessor_RxTest.class.getName());
 	@Before
 	public void setUp() throws Exception {
 		addPurchaseRequest( 10, 10, 10);

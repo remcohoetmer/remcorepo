@@ -24,15 +24,16 @@ public class PurchaseRequestController {
 		purchaseRequests.put(purchaseRequestId, purchaseRequest);
 	}
 	
-
 	public void update(PurchaseRequest purchaseRequest, OrderData orderData) {
 		purchaseRequest.setOrderId( orderData.getId());
 	}
 
+	
+	
+	
 	private PurchaseRequest getPurchaseRequest(Integer purchaseRequestId) throws ValidationException
 	{
 		LOG.info( Thread.currentThread().getName());
-		new Exception().printStackTrace();
 		if (purchaseRequests.containsKey(purchaseRequestId)) {
 			return purchaseRequests.get(purchaseRequestId);
 		}

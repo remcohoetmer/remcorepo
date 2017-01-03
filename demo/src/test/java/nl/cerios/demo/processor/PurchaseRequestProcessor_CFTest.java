@@ -1,14 +1,10 @@
 package nl.cerios.demo.processor;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import nl.cerios.demo.DemoLogManager;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.service.LocationConfig;
 import nl.cerios.demo.service.LocationService_CF;
@@ -37,7 +33,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 
 		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
 
-		new PurchaseRequestProcessor_CF().handle( requestData, stub);
+		new PurchaseRequestProcessor_CF().handle( requestData, stub).join();
 
 		Assert.assertNotNull(stub.purchaseRequest);
 		Assert.assertEquals( new Integer( 10), stub.purchaseRequest.getLocationId());

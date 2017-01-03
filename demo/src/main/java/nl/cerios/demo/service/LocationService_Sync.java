@@ -8,8 +8,6 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Logger;
 
 import nl.cerios.demo.LaunderThrowable;
-import nl.cerios.demo.http.impl.PurchaseHttpHandlerImpl;
-
 
 public class LocationService_Sync {
 	private static final Logger LOG = Logger.getLogger(LocationService_Sync.class.getName());

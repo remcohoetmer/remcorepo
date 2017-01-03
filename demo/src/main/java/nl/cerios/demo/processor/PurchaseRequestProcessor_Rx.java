@@ -2,7 +2,6 @@ package nl.cerios.demo.processor;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.internal.functions.Functions;
-import io.reactivex.schedulers.Schedulers;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.service.CustomerData;
 import nl.cerios.demo.service.CustomerValidation;
@@ -20,7 +19,7 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 	{
 		Single<PurchaseRequest> purchaseRequestSingle = 
 				purchaseRequestController.getPurchaseRequest_Rx( requestData.getPurchaseRequestId())
-				.cache();
+			.cache();
 
 		Single<CustomerData> customerDataSingle= customerService.getCustomerData_Rx(
 				purchaseRequestSingle

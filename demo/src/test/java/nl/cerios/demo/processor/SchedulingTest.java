@@ -1,7 +1,9 @@
 package nl.cerios.demo.processor;
+import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Logger;
 
 import io.reactivex.Single;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.service.PurchaseRequest;
@@ -24,8 +26,12 @@ public class SchedulingTest {
     	HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 10);
 		Single<PurchaseRequest> single= new PurchaseRequestProcessor_Rx().handle( requestData);
-		single.observeOn(Schedulers.io()).subscribeOn(Schedulers.computation()).subscribe(v -> LOG.info( Thread.currentThread().getName()));
-		single.observeOn(Schedulers.io()).subscribeOn(Schedulers.single()).subscribe(v -> LOG.info( Thread.currentThread().getName()));
+		Consumer<? super PurchaseRequest> onSuccess = v -> LOG.info( "order id: " + v.getOrderId() + " "+ Thread.currentThread().getName());
+		single.observeOn(Schedulers.newThread()).subscribeOn(Schedulers.from( ForkJoinPool.commonPool()))
+		.subscribe(onSuccess);
+		single.observeOn(Schedulers.io()).subscribeOn(Schedulers.from( ForkJoinPool.commonPool()))
+		.subscribe(onSuccess);
+//		single.observeOn(Schedulers.io()).subscribeOn(Schedulers.computation()).subscribe(v -> LOG.info( Thread.currentThread().getName()));
 		LOG.info( Thread.currentThread().getName()+ " exit");
 		Thread.sleep(100000);
 	}
