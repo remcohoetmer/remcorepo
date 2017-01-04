@@ -24,8 +24,9 @@ public class PurchaseRequestController {
 		purchaseRequests.put(purchaseRequestId, purchaseRequest);
 	}
 	
-	public void update(PurchaseRequest purchaseRequest, OrderData orderData) {
+	private PurchaseRequest update(PurchaseRequest purchaseRequest, OrderData orderData) {
 		purchaseRequest.setOrderId( orderData.getId());
+		return purchaseRequest;
 	}
 	
 	private PurchaseRequest getPurchaseRequest(Integer purchaseRequestId) throws ValidationException
@@ -37,6 +38,24 @@ public class PurchaseRequestController {
 		throw new ValidationException( "No purchase request");
 	}
 	
+	
+	
+	public PurchaseRequest update_Sync(PurchaseRequest purchaseRequest, OrderData orderData)
+	{
+		return update( purchaseRequest, orderData);
+	}
+	
+	public CompletableFuture<PurchaseRequest> update_CF(PurchaseRequest purchaseRequest, OrderData orderData)
+	{
+		return CompletableFuture.supplyAsync( transportException( ()-> update( purchaseRequest,orderData)));
+	}
+
+	public Single<PurchaseRequest> update_Rx(final PurchaseRequest purchaseRequest, OrderData orderData)
+	{
+		// postpone the computation of the value until request time, not build time
+		return Single.defer( ()-> Single.just( update( purchaseRequest, orderData)));
+	}
+
 	public PurchaseRequest getPurchaseRequest_Sync(Integer purchaseRequestId) throws ValidationException{
 		return getPurchaseRequest( purchaseRequestId);
 	}

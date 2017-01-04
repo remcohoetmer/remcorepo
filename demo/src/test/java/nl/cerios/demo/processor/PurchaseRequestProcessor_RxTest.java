@@ -75,6 +75,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		ts.assertError(ValidationException.class);
 		Assert.assertThat( ts.errors().get(0).getMessage(), CoreMatchers.containsString( "Invalid location"));
 	}
+	
 	@Test
 	public void testValidateCustomerFailed() {
 		HttpRequestData requestData= new HttpRequestData();

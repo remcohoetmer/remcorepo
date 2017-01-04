@@ -10,6 +10,4 @@ public class HttpRequestData {
 	public void setPurchaseRequestId(Integer purchaseRequestId) {
 		this.purchaseRequestId = purchaseRequestId;
 	}
-
-
 }

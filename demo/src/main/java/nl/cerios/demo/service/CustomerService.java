@@ -21,7 +21,7 @@ public class CustomerService {
 		return new CustomerData(customerId);
 	}
 
-	public CustomerValidation validateCustomer(CustomerData customerData, LocationConfig locationData) {
+	public CustomerValidation validateCustomer_Sync(CustomerData customerData, LocationConfig locationData) {
 		LOG.info( Thread.currentThread().getName());
 		CustomerValidation validation= new CustomerValidation();
 		Status status= Status.OK;
@@ -41,7 +41,7 @@ public class CustomerService {
 	}
 
 	public CompletableFuture<CustomerValidation> validateCustomer_CF(CustomerData customerData, LocationConfig locationData) {
-		return CompletableFuture.supplyAsync( ()-> validateCustomer(customerData, locationData));
+		return CompletableFuture.supplyAsync( ()-> validateCustomer_Sync(customerData, locationData));
 	}
 
 	public Single<CustomerData> getCustomerData_Rx(Integer customerId) {
@@ -49,7 +49,7 @@ public class CustomerService {
 	}
 
 	public Single<CustomerValidation> validateCustomer_Rx(CustomerData customerData, LocationConfig locationData) {
-		return Single.defer( ()->Single.just( validateCustomer(customerData, locationData)));
+		return Single.defer( ()->Single.just( validateCustomer_Sync(customerData, locationData)));
 	}
 
 }

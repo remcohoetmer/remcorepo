@@ -15,45 +15,31 @@ public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 
 	public void handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
-		PurchaseRequest purchaseRequest;
-		try {		
-			purchaseRequest = purchaseRequestController.getPurchaseRequest_Sync( requestData.getPurchaseRequestId());
+		try 
+		{ 
+			PurchaseRequest purchaseRequest = purchaseRequestController.getPurchaseRequest_Sync( requestData.getPurchaseRequestId());
+			CustomerData customerData= customerService.getCustomerData_Sync( purchaseRequest.getCustomerId());
+			LocationConfig locationData= locationService_Sync.getLocationConfig(purchaseRequest.getLocationId());
+
+			CustomerValidation customerValidation = customerService.validateCustomer_Sync( customerData, locationData);
+			if (customerValidation.getStatus() != Status.OK) {
+				throw new ValidationException( customerValidation.getMessage());
+			}
+			TransactionValidation transactionValidation = transactionService.validate_Sync( purchaseRequest, customerData);
+			if (transactionValidation.getStatus() != Status.OK) {
+				throw new ValidationException( transactionValidation.getMessage());
+			}
+
+			OrderData orderData= orderService.createOrder_Sync( purchaseRequest);
+			purchaseRequest= purchaseRequestController.update_Sync( purchaseRequest, orderData);
+
+			Status status= transactionService.linkOrderToTransaction_Sync( purchaseRequest);
+			if (status != Status.OK) {
+				mailboxHandler.sendMessage( composeLinkingFailedMessage( purchaseRequest));
+			}
+			purchaseHandler.notifyComplete( purchaseRequest);
 		} catch (ValidationException e) {
 			purchaseHandler.notifyError( e);
-			return;
 		}
-		CustomerData customerData;
-		try {		
-			customerData = customerService.getCustomerData_Sync( purchaseRequest.getCustomerId());
-		} catch (ValidationException e) {
-			purchaseHandler.notifyError( e);
-			return;
-		}
-
-		LocationConfig locationData= locationService_Sync.getLocationConfig(purchaseRequest.getLocationId());
-
-		CustomerValidation customerValidation = customerService.validateCustomer( customerData, locationData);
-		if (customerValidation.getStatus() != Status.OK) {
-			purchaseHandler.notifyError( new ValidationException( customerValidation.getMessage()));
-			return;
-		}
-
-		TransactionValidation transactionValidation = transactionService.validate_Sync( purchaseRequest, customerData);
-		if (transactionValidation.getStatus() != Status.OK) {
-			purchaseHandler.notifyError( new ValidationException( transactionValidation.getMessage()));
-		}
-
-		OrderData orderData= orderService.createOrder( purchaseRequest);
-		purchaseRequestController.update( purchaseRequest, orderData);
-
-		Status status= transactionService.linkOrderToTransaction_Sync( purchaseRequest);
-		if (status != Status.OK) {
-
-			// Payment and order OK, however: automatic linking failed --> manual 
-			mailboxHandler.sendMessage( composeLinkingFailedMessage( purchaseRequest));
-		}
-
-		purchaseHandler.notifyComplete( purchaseRequest);
 	}
-
 }

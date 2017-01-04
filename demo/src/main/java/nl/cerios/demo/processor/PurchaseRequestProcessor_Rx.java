@@ -47,11 +47,8 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 
 								return transactionValidationCompl
 										.andThen( orderService.createOrder_Rx( purchaseRequest))
-										.map( orderData-> {
-											purchaseRequestController.update( purchaseRequest, orderData);
-											return purchaseRequest;
-										})
-										.flatMap(purchaseRequest2 -> {
+										.flatMap( orderData-> purchaseRequestController.update_Rx( purchaseRequest, orderData))
+										.flatMap( purchaseRequest2 -> {
 											return transactionService.linkOrderToTransaction_Rx(purchaseRequest2)
 													.flatMap(status->{ 
 														Completable res;

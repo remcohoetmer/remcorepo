@@ -1,6 +1,5 @@
 package nl.cerios.demo.processor;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
@@ -18,61 +17,28 @@ import nl.cerios.demo.service.ValidationException;
 public class PurchaseRequestProcessor_CF extends BaseProcessor {
 	private static final Logger LOG = Logger.getLogger(PurchaseRequestProcessor_CF.class.getName());
 
-	<T> T handleCFException( Throwable e, Function<ValidationException, ? extends T> func)
+
+	public CompletableFuture<Object> handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
-		LOG.info("handleCFException "+ e);
-		if (e instanceof java.util.concurrent.CompletionException) {
-			e=e.getCause();
-		}
-		if (e instanceof IllegalStateException
-				&& ((IllegalStateException)e).getCause()!= null
-				&& ((IllegalStateException)e).getCause() instanceof ValidationException) {
-			ValidationException ve= (ValidationException) ((IllegalStateException)e).getCause();
-			LOG.info("Obtained business exception: "+ ve);
-			return func.apply( ve);	
-		}
-		if (e instanceof RuntimeException) 
-			throw (RuntimeException)e;
-		throw new RuntimeException(e);
-	}
-
-	public CompletableFuture<Void> handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
-	{
-		BiFunction<? super PurchaseRequest,Throwable,? extends PurchaseRequest> ehPurchaseRequest = (func,e)-> handleCFException( e, f -> {
-			purchaseHandler.notifyError( f);
-			return null;
-		});
-		Function<Throwable,CustomerData> ehCustomerData = e-> handleCFException( e, f -> {
-			purchaseHandler.notifyError( f);
-			return null;
-		});
-		Function<Throwable,CustomerValidation> ehCustomerValidation = e-> handleCFException( e, f -> {
-			purchaseHandler.notifyError( f);
-			return null;
-		});
-		Function<Throwable,TransactionValidation> ehTransactionValidation = e-> handleCFException( e, f -> {
-			purchaseHandler.notifyError( f);
-			return null;
-		});		
-
-
 		CompletableFuture<PurchaseRequest> purchaseRequestCF=
 				purchaseRequestController.getPurchaseRequest_CF( requestData.getPurchaseRequestId());
 
-		CompletableFuture<CustomerData> customerDataCF= purchaseRequestCF.thenCompose(
-				(purchaseRequest) ->
+		CompletableFuture<CustomerData> customerDataCF= purchaseRequestCF.thenComposeAsync(
+				purchaseRequest ->
 				customerService.getCustomerData_CF( purchaseRequest.getCustomerId()));
 
-		CompletableFuture<LocationConfig> locationDataCF= purchaseRequestCF.thenCompose(
-				(purchaseRequest) ->
-				locationService_CF.getLocationConfig(purchaseRequest.getLocationId()));
+		CompletableFuture<LocationConfig> locationDataCF= purchaseRequestCF.thenComposeAsync(
+				purchaseRequest -> {
+					if (purchaseRequest.getLocationId() == null)
+						throw new IllegalStateException(new ValidationException( "Invalid location")); 
+					return locationService_CF.getLocationConfig(purchaseRequest.getLocationId());
+				});
 
 		CompletableFuture<CustomerValidation> customerValidationCF=
 				customerDataCF.
-				// combine async?
-				thenCombine(locationDataCF, (customerData, locationData)
+				thenCombineAsync(locationDataCF, (customerData, locationData)
 						-> customerService.validateCustomer_CF( customerData, locationData))
-				.thenCompose( Function.identity())
+				.thenComposeAsync( Function.identity())
 				.thenApplyAsync(  customerValidation 
 						-> {
 							LOG.info( " " + customerValidation.getStatus());
@@ -80,12 +46,12 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 								throw new IllegalStateException(new ValidationException(customerValidation.getMessage())); 
 							else return customerValidation;
 						});
-		// het is niet mogelijk om switches te programmeren
+
 
 		CompletableFuture<TransactionValidation> transactionValidationCF=
 				customerValidationCF                   // don't use the result, only the error and the trigger
 				.thenComposeAsync( dummy -> purchaseRequestCF)  
-				.thenCombine( customerDataCF,
+				.thenCombineAsync( customerDataCF,
 						(purchaseRequest, customerData) -> transactionService.validate_CF( purchaseRequest, customerData))
 				.thenComposeAsync( Function.identity())
 				.thenApplyAsync(  transactionValidation
@@ -100,16 +66,14 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 				transactionValidationCF                   // don't use the result, only the error and the trigger
 				.thenComposeAsync( dummy -> purchaseRequestCF)
 				.thenComposeAsync( purchaseRequest-> orderService.createOrder_CF( purchaseRequest))
-				.thenCombine( purchaseRequestCF, (orderData, purchaseRequest) 
-						-> {
-							purchaseRequestController.update( purchaseRequest, orderData);
-							return purchaseRequest;
-						});
+				.thenCombineAsync( purchaseRequestCF, (orderData, purchaseRequest) 
+						-> purchaseRequestController.update_CF( purchaseRequest, orderData))
+				.thenComposeAsync( Function.identity());
 
 		return updatedPurchaseRequestCF
 				.thenComposeAsync(
 						purchaseRequest -> transactionService.linkOrderToTransaction_CF( purchaseRequest))
-				.thenCombine( updatedPurchaseRequestCF,
+				.thenCombineAsync( updatedPurchaseRequestCF,
 						(status, purchaseRequest) ->
 				{
 					if (status != Status.OK) {
@@ -117,15 +81,39 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 						mailboxHandler.sendMessage( composeLinkingFailedMessage( purchaseRequest));
 					} 
 					return purchaseRequest;
-					
+
 				})
-				/*
-				.handle( (func,e)-> handleCFException( e, f -> {
-					purchaseHandler.notifyError( f);
-					return (PurchaseRequest) null;
-				})) */
-				.thenAccept( purchaseRequest ->purchaseHandler.notifyComplete( purchaseRequest));
-		
+				.handle(
+						(purchaseRequest, throwable)-> {
+							if (throwable!= null) {
+								extractCheckedException( throwable, f -> {
+									purchaseHandler.notifyError( f);
+									return null;
+								});
+							} 
+							else { 
+								purchaseHandler.notifyComplete( purchaseRequest);
+							}
+							return new Object();
+						});
+	}
+
+
+	<T> T extractCheckedException( Throwable e, Function<ValidationException, ? extends T> func)
+	{
+		if (e instanceof java.util.concurrent.CompletionException) {
+			e=e.getCause();
+		}
+		if (e instanceof IllegalStateException
+				&& ((IllegalStateException)e).getCause()!= null
+				&& ((IllegalStateException)e).getCause() instanceof ValidationException) {
+			ValidationException ve= (ValidationException) ((IllegalStateException)e).getCause();
+			LOG.info("Obtained business exception: "+ ve);
+			return func.apply( ve);	
+		}
+		if (e instanceof RuntimeException) 
+			throw (RuntimeException)e;
+		throw new RuntimeException(e);
 	}
 }
 
