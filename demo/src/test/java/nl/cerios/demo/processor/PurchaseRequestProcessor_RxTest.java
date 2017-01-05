@@ -20,6 +20,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 	@Before
 	public void setUp() throws Exception {
 		addPurchaseRequest( 10, 10, 10);
+		addPurchaseRequest( 11, 11, 11);
 		addPurchaseRequest( 0, 0, null);
 		addPurchaseRequest( 13, 13, 15);
 		DemoLogManager.initialise();	
@@ -40,7 +41,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 	}
 	
 	@Test
-	public void testHandle() {
+	public void testOrder90() {
 		HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 10);
 		
@@ -51,8 +52,25 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 	    assertEquals(1, ts.values().size());
 	    PurchaseRequest purchaseRequest= ts.values().get(0);
 		Assert.assertEquals( new Integer( 10), purchaseRequest.getLocationId());
+		Assert.assertEquals( new Integer( 90), purchaseRequest.getOrderId());
 	}
 
+	@Test
+	public void testOrder100() {
+		HttpRequestData requestData= new HttpRequestData();
+		requestData.setPurchaseRequestId( 11);
+		
+		TestObserver<PurchaseRequest> ts= new TestObserver<>();
+		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
+		
+		ts.assertNoErrors();
+	    assertEquals(1, ts.values().size());
+	    PurchaseRequest purchaseRequest= ts.values().get(0);
+		Assert.assertEquals( new Integer( 11), purchaseRequest.getLocationId());
+		Assert.assertEquals( new Integer( 100), purchaseRequest.getOrderId());
+	}
+
+	
 	@Test
 	public void testInvalidCustomer() {
 		HttpRequestData requestData= new HttpRequestData();

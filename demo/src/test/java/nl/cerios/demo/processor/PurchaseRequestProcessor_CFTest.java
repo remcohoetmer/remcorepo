@@ -16,6 +16,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 	@Before
 	public void setUp() throws Exception {
 		addPurchaseRequest( 10, 10, 10);
+		addPurchaseRequest( 11, 11, 11);
 		addPurchaseRequest( 0, 0, null);
 		addPurchaseRequest( 13, 13, 15);
 	}
@@ -30,7 +31,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 	}
 
 	@Test
-	public void testHandle() throws Exception 
+	public void testOrder90() throws Exception 
 	{
 		HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 10);
@@ -41,6 +42,22 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 
 		Assert.assertNotNull(stub.purchaseRequest);
 		Assert.assertEquals( new Integer( 10), stub.purchaseRequest.getLocationId());
+		Assert.assertEquals( new Integer( 90), stub.purchaseRequest.getOrderId());
+	}
+
+	@Test
+	public void testOrder100() throws Exception 
+	{
+		HttpRequestData requestData= new HttpRequestData();
+		requestData.setPurchaseRequestId( 11);
+
+		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
+
+		new PurchaseRequestProcessor_CF().handle( requestData, stub).join();
+
+		Assert.assertNotNull(stub.purchaseRequest);
+		Assert.assertEquals( new Integer( 11), stub.purchaseRequest.getLocationId());
+		Assert.assertEquals( new Integer( 100), stub.purchaseRequest.getOrderId());
 	}
 
 	@Test

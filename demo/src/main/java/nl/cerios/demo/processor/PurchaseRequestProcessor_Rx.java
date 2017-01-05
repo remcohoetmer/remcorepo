@@ -3,6 +3,7 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.service.LocationConfig;
+import nl.cerios.demo.service.OrderData;
 import nl.cerios.demo.service.PurchaseRequest;
 import nl.cerios.demo.service.Status;
 import nl.cerios.demo.service.ValidationException;
@@ -45,8 +46,12 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 										})
 										.toCompletable();
 
+								Single<OrderData> orderServiceObs= (purchaseRequest.getPurchaseRequestId()==10)?
+										orderService.createOrder90_Rx( purchaseRequest):
+										orderService.createOrder100_Rx( purchaseRequest);
+											
 								return transactionValidationCompl
-										.andThen( orderService.createOrder_Rx( purchaseRequest))
+										.andThen( orderServiceObs)
 										.flatMap( orderData-> purchaseRequestController.update_Rx( purchaseRequest, orderData))
 										.flatMap( purchaseRequest2 -> {
 											return transactionService.linkOrderToTransaction_Rx(purchaseRequest2)

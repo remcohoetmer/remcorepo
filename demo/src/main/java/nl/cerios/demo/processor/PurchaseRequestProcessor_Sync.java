@@ -30,12 +30,12 @@ public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 				throw new ValidationException( transactionValidation.getMessage());
 			}
 
-			OrderData orderData= orderService.createOrder_Sync( purchaseRequest);
+			OrderData orderData= orderService.createOrder90_Sync( purchaseRequest);
 			purchaseRequest= purchaseRequestController.update_Sync( purchaseRequest, orderData);
 
 			Status status= transactionService.linkOrderToTransaction_Sync( purchaseRequest);
 			if (status != Status.OK) {
-				mailboxHandler.sendMessage( composeLinkingFailedMessage( purchaseRequest));
+				mailboxHandler.sendMessage_Sync( composeLinkingFailedMessage( purchaseRequest));
 			}
 			purchaseHandler.notifyComplete( purchaseRequest);
 		} catch (ValidationException e) {
