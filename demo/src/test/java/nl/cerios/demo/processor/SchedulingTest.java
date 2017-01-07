@@ -8,6 +8,7 @@ import io.reactivex.schedulers.Schedulers;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.service.PurchaseRequest;
 import nl.cerios.demo.service.PurchaseRequestController;
+import nl.cerios.demo.service.PurchaseResponse;
 
 
 public class SchedulingTest {
@@ -25,8 +26,8 @@ public class SchedulingTest {
 		addPurchaseRequest( 10, 10, 10);
     	HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 10);
-		Single<PurchaseRequest> single= new PurchaseRequestProcessor_Rx().handle( requestData);
-		Consumer<? super PurchaseRequest> onSuccess = v -> LOG.info( "order id: " + v.getOrderId() + " "+ Thread.currentThread().getName());
+		Single<PurchaseResponse> single= new PurchaseRequestProcessor_Rx().handle( requestData);
+		Consumer<? super PurchaseResponse> onSuccess = v -> LOG.info( "order id: " + v.getOrderId() + " "+ Thread.currentThread().getName());
 		single.observeOn(Schedulers.newThread()).subscribeOn(Schedulers.from( ForkJoinPool.commonPool()))
 		.subscribe(onSuccess);
 		single.observeOn(Schedulers.io()).subscribeOn(Schedulers.from( ForkJoinPool.commonPool()))

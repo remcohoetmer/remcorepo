@@ -5,12 +5,13 @@ import java.util.logging.Logger;
 import nl.cerios.demo.http.PurchaseHttpHandler;
 import nl.cerios.demo.service.PurchaseRequest;
 import nl.cerios.demo.service.PurchaseRequestController;
+import nl.cerios.demo.service.PurchaseResponse;
 
 public abstract class PurchaseRequestProcessorTestBase
 {
 	private static final Logger LOG = Logger.getLogger(PurchaseRequestProcessorTestBase.class.getName());
 	static class PurchaseHttpHandlerStub implements PurchaseHttpHandler {
-		PurchaseRequest purchaseRequest;
+		PurchaseResponse purchaseResponse;
 		String message;
 		@Override
 		public void notifyError(Throwable throwable) {
@@ -20,9 +21,9 @@ public abstract class PurchaseRequestProcessorTestBase
 		}
 
 		@Override
-		public void notifyComplete(PurchaseRequest purchaseRequest) {
-			this.purchaseRequest= purchaseRequest;
-			LOG.info(purchaseRequest.toString());
+		public void notifyComplete(PurchaseResponse purchaseResponse) {
+			this.purchaseResponse= purchaseResponse;
+			LOG.info(purchaseResponse.toString());
 		}
 	};
 	

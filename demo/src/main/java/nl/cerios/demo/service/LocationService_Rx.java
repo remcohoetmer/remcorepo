@@ -18,10 +18,9 @@ public class LocationService_Rx {
 			Single<LocationConfig> new_obs= retrieveLocationConfig( locationId).cache();
 			obs = cache.putIfAbsent(locationId, new_obs);
 			if (obs==null) {
-				// there was no item in the cache
-				return new_obs;
+				return new_obs; // there was no item in the cache
 			} else {
-				return obs;
+				return obs;// de cache had toch een waarde
 			}
 		}
 		return obs;
@@ -36,8 +35,6 @@ public class LocationService_Rx {
 	private Single<LocationConfig> retrieveLocationConfig( final Integer locationId)
 	{
 		LOG.info( "Obtain location "+ locationId);
-		// create new Flowable that will trigger DB request
-		// pull model: it will only start when subscribed
 		return Single.defer( ()->Single.just( new LocationConfig(locationId)));	
 	}
 }

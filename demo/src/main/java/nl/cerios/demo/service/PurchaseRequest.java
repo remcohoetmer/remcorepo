@@ -31,13 +31,6 @@ public class PurchaseRequest {
 	public void setCustomerId(Integer customerId) {
 		this.customerId = customerId;
 	}
-	public Integer getOrderId() {
-		return orderId;
-	}
-	public void setOrderId(Integer orderId) {
-		this.orderId = orderId;
-	}
-
 
 	public PurchaseRequest() {
 	}
@@ -48,7 +41,6 @@ public class PurchaseRequest {
     public String toString() {
 		StringBuffer sb= new StringBuffer();
 		sb.append( " customerId ").append( customerId);
-		sb.append( " orderId ").append( orderId);
 		sb.append( " transactionId ").append( transactionId);
 		return sb.toString();
 	}

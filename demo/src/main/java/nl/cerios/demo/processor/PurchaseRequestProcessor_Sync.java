@@ -6,6 +6,7 @@ import nl.cerios.demo.service.CustomerValidation;
 import nl.cerios.demo.service.LocationConfig;
 import nl.cerios.demo.service.OrderData;
 import nl.cerios.demo.service.PurchaseRequest;
+import nl.cerios.demo.service.PurchaseResponse;
 import nl.cerios.demo.service.Status;
 import nl.cerios.demo.service.TransactionValidation;
 import nl.cerios.demo.service.ValidationException;
@@ -30,14 +31,14 @@ public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 				throw new ValidationException( transactionValidation.getMessage());
 			}
 
-			OrderData orderData= orderService.createOrder90_Sync( purchaseRequest);
-			purchaseRequest= purchaseRequestController.update_Sync( purchaseRequest, orderData);
+			OrderData orderData= orderService.createOrder_Sync( purchaseRequest);
+			PurchaseResponse purchaseResponse= purchaseRequestController.update_Sync( purchaseRequest, orderData);
 
 			Status status= transactionService.linkOrderToTransaction_Sync( purchaseRequest);
 			if (status != Status.OK) {
-				mailboxHandler.sendMessage_Sync( composeLinkingFailedMessage( purchaseRequest));
+				mailboxHandler.sendMessage_Sync( composeLinkingFailedMessage( purchaseResponse));
 			}
-			purchaseHandler.notifyComplete( purchaseRequest);
+			purchaseHandler.notifyComplete( purchaseResponse);
 		} catch (ValidationException e) {
 			purchaseHandler.notifyError( e);
 		}

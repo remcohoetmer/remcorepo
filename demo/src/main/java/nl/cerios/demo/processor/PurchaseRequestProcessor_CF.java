@@ -5,10 +5,8 @@ import java.util.logging.Logger;
 
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
-import nl.cerios.demo.service.CustomerData;
 import nl.cerios.demo.service.CustomerValidation;
 import nl.cerios.demo.service.LocationConfig;
-import nl.cerios.demo.service.OrderData;
 import nl.cerios.demo.service.PurchaseRequest;
 import nl.cerios.demo.service.Status;
 import nl.cerios.demo.service.TransactionValidation;
@@ -24,88 +22,53 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 		CompletableFuture<PurchaseRequest> purchaseRequestCF=
 				purchaseRequestController.getPurchaseRequest_CF( requestData.getPurchaseRequestId());
 
-		return purchaseRequestCF.thenComposeAsync(
-				purchaseRequest -> {
-					CompletableFuture<CustomerData> customerDataCF= customerService.getCustomerData_CF( purchaseRequest.getCustomerId());
+		return purchaseRequestCF.thenCompose( purchaseRequest -> {
+			return customerService.getCustomerData_CF( purchaseRequest.getCustomerId())
+					.thenCompose( customerData-> {
 
-					if (purchaseRequest.getLocationId() == null)
-						throw new IllegalStateException(new ValidationException( "Invalid location"));
-					CompletableFuture<LocationConfig> locationDataCF= locationService_CF.getLocationConfig(purchaseRequest.getLocationId());
+						if (purchaseRequest.getLocationId() == null)
+							throw new IllegalStateException(new ValidationException( "Invalid location"));
 
-					CompletableFuture<CustomerValidation> customerValidationCF=
-							customerDataCF.
-							thenCombineAsync(locationDataCF, (customerData, locationData)
-									-> customerService.validateCustomer_CF( customerData, locationData))
-							.thenComposeAsync( Function.identity())
-							.thenApplyAsync(  customerValidation 
-									-> {
-										LOG.info( " " + customerValidation.getStatus());
-										if (customerValidation.getStatus() != Status.OK)
-											throw new IllegalStateException(new ValidationException(customerValidation.getMessage())); 
-										else return customerValidation;
-									});
+						CompletableFuture<LocationConfig> locationDataCF= locationService_CF.getLocationConfig(purchaseRequest.getLocationId());
 
-
-					CompletableFuture<TransactionValidation> transactionValidationCF=
-							customerValidationCF                   // don't use the result, only the error and the trigger
-							.thenComposeAsync( dummy -> customerDataCF)  
-							.thenComposeAsync( 
-									customerData -> transactionService.validate_CF( purchaseRequest, customerData))
-							.thenApplyAsync(  transactionValidation
-									-> { 
-										LOG.info( " " + transactionValidation.getStatus());
-										if (transactionValidation.getStatus() != Status.OK)
-											throw new IllegalStateException(new ValidationException(transactionValidation.getMessage())); 
-										else return transactionValidation;
-									});
-
-					Function<TransactionValidation,CompletableFuture<Void>> order90Filter= dummy -> {
-							if (purchaseRequest.getPurchaseRequestId()==10) 
-								return CompletableFuture.completedFuture(null);
-							else 
-								return new CompletableFuture<Void>();
-							};
-					Function<TransactionValidation,CompletableFuture<Void>> order100Filter= dummy -> {
-								if (purchaseRequest.getPurchaseRequestId()!=10) 
-									return CompletableFuture.completedFuture(null);
-								else 
-									return new CompletableFuture<Void>();
-								};
-
-							
-					CompletableFuture<OrderData> orderdataCF_1=
-							transactionValidationCF                   // don't use the result, only the error and the trigger
-							.thenComposeAsync( order90Filter)
-							.thenComposeAsync( dummy -> orderService.createOrder90_CF( purchaseRequest));
-
-					CompletableFuture<OrderData> orderdataCF_2=
-							transactionValidationCF                   // don't use the result, only the error and the trigger
-							.thenComposeAsync( order100Filter)
-							.thenComposeAsync( dummy -> orderService.createOrder100_CF( purchaseRequest));
-					
-					CompletableFuture<Object> orderdataCF= CompletableFuture.anyOf( orderdataCF_1, orderdataCF_2);
-					
-					CompletableFuture<PurchaseRequest> updatedPurchaseRequestCF=
-							orderdataCF.thenComposeAsync( orderData 
-									-> purchaseRequestController.update_CF( purchaseRequest, (OrderData)orderData));
-
-					CompletableFuture<PurchaseRequest> updatedPurchaseRequestCF2= updatedPurchaseRequestCF
-							.thenComposeAsync( purchaseRequest1 -> {
-								return transactionService.linkOrderToTransaction_CF( purchaseRequest1)
-										.thenComposeAsync( status -> {
-											CompletableFuture<Void> result;
-											if (status != Status.OK) {
-												// Payment and order OK, however: automatic linking failed --> manual 
-												result= mailboxHandler.sendMessage_CF( composeLinkingFailedMessage( purchaseRequest1));
-											} else {
-												result= CompletableFuture.completedFuture(null);
-											}
-											return result.thenApply( voiddummy->purchaseRequest1);
+						CompletableFuture<CustomerValidation> customerValidationCF=
+								locationDataCF.
+								thenCompose( locationData
+										-> customerService.validateCustomer_CF( customerData, locationData))
+								.thenApply(  customerValidation 
+										-> {
+											if (customerValidation.getStatus() != Status.OK)
+												throw new IllegalStateException(new ValidationException(customerValidation.getMessage())); 
+											return customerValidation;
 										});
-							});
-					return updatedPurchaseRequestCF2;
-				})
-				.handle((purchaseRequest, throwable)-> {
+
+						CompletableFuture<TransactionValidation> transactionValidationCF=
+								transactionService.validate_CF( purchaseRequest, customerData)
+								.thenApply(  transactionValidation -> { 
+									if (transactionValidation.getStatus() != Status.OK)
+										throw new IllegalStateException(new ValidationException(transactionValidation.getMessage())); 
+									return transactionValidation;
+								});
+
+						return CompletableFuture.allOf( customerValidationCF, transactionValidationCF)
+								.thenCompose( dummy -> orderService.createOrder_CF( purchaseRequest))
+								.thenCompose( orderData -> purchaseRequestController.update_CF( purchaseRequest, orderData))
+								.thenCompose( purchaseResponse -> {
+									return transactionService.linkOrderToTransaction_CF( purchaseRequest)
+											.thenCompose( status -> {
+												CompletableFuture<Void> result;
+												if (status != Status.OK) {
+													// Payment and order OK, however: automatic linking failed --> manual 
+													result= mailboxHandler.sendMessage_CF( composeLinkingFailedMessage( purchaseResponse));
+												} else {
+													result= CompletableFuture.completedFuture(null);
+												}
+												return result.thenApply( dummy->purchaseResponse);
+											});
+								});
+					});
+		})
+				.handle((purchaseResponse, throwable)-> {
 					if (throwable!= null) {
 						extractCheckedException( throwable, f -> {
 							purchaseHandler.notifyError( f);
@@ -113,7 +76,7 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 						});
 					} 
 					else {
-						purchaseHandler.notifyComplete( purchaseRequest);
+						purchaseHandler.notifyComplete( purchaseResponse);
 					}
 					return null;
 				});

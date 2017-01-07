@@ -12,6 +12,7 @@ import io.reactivex.observers.TestObserver;
 import nl.cerios.demo.DemoLogManager;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.service.PurchaseRequest;
+import nl.cerios.demo.service.PurchaseResponse;
 import nl.cerios.demo.service.ValidationException;
 
 
@@ -31,52 +32,35 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 10);
 		
-		TestObserver<PurchaseRequest> ts= new TestObserver<>();
+		TestObserver<PurchaseResponse> ts= new TestObserver<>();
 		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
 		
 		ts.assertNoErrors();
 	    assertEquals(1, ts.values().size());
-	    PurchaseRequest purchaseRequest= ts.values().get(0);
-		Assert.assertEquals( new Integer( 10), purchaseRequest.getLocationId());
+	    PurchaseResponse purchaseResponse= ts.values().get(0);
+		Assert.assertEquals( new Integer( 90), purchaseResponse.getOrderId());
 	}
 	
 	@Test
-	public void testOrder90() {
+	public void testOrder() {
 		HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 10);
 		
-		TestObserver<PurchaseRequest> ts= new TestObserver<>();
+		TestObserver<PurchaseResponse> ts= new TestObserver<>();
 		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
 		
 		ts.assertNoErrors();
 	    assertEquals(1, ts.values().size());
-	    PurchaseRequest purchaseRequest= ts.values().get(0);
-		Assert.assertEquals( new Integer( 10), purchaseRequest.getLocationId());
-		Assert.assertEquals( new Integer( 90), purchaseRequest.getOrderId());
+	    PurchaseResponse purchaseResponse= ts.values().get(0);
+		Assert.assertEquals( new Integer( 90), purchaseResponse.getOrderId());
 	}
 
-	@Test
-	public void testOrder100() {
-		HttpRequestData requestData= new HttpRequestData();
-		requestData.setPurchaseRequestId( 11);
-		
-		TestObserver<PurchaseRequest> ts= new TestObserver<>();
-		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
-		
-		ts.assertNoErrors();
-	    assertEquals(1, ts.values().size());
-	    PurchaseRequest purchaseRequest= ts.values().get(0);
-		Assert.assertEquals( new Integer( 11), purchaseRequest.getLocationId());
-		Assert.assertEquals( new Integer( 100), purchaseRequest.getOrderId());
-	}
-
-	
 	@Test
 	public void testInvalidCustomer() {
 		HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 2);
 		
-		TestObserver<PurchaseRequest> ts= new TestObserver<>();
+		TestObserver<PurchaseResponse> ts= new TestObserver<>();
 		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
 	
 		Assert.assertThat( ts.errors().get(0).getMessage(), CoreMatchers.containsString( "No purchase request"));
@@ -87,7 +71,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 0);
 		
-		TestObserver<PurchaseRequest> ts= new TestObserver<>();
+		TestObserver<PurchaseResponse> ts= new TestObserver<>();
 		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
 		
 		ts.assertError(ValidationException.class);
@@ -99,7 +83,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 13);
 		
-		TestObserver<PurchaseRequest> ts= new TestObserver<>();
+		TestObserver<PurchaseResponse> ts= new TestObserver<>();
 		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
 		
 		ts.assertError(ValidationException.class);

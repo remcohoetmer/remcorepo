@@ -16,6 +16,7 @@ import nl.cerios.demo.processor.PurchaseRequestProcessor_CF;
 import nl.cerios.demo.processor.PurchaseRequestProcessor_Rx;
 import nl.cerios.demo.processor.PurchaseRequestProcessor_Sync;
 import nl.cerios.demo.service.PurchaseRequest;
+import nl.cerios.demo.service.PurchaseResponse;
 
 @WebServlet(asyncSupported = true, value = "/WebShop", loadOnStartup = 1)
 public class HttpEventHandler extends HttpServlet {
@@ -57,7 +58,7 @@ class PurchaseHttpHandlerDispatcher implements PurchaseHttpHandler {
 		boolean cf= false;
 		boolean rxjava= true;
 		if (rxjava) {
-			Single<PurchaseRequest> ons= new PurchaseRequestProcessor_Rx().handle( httpRequestData);
+			Single<PurchaseResponse> ons= new PurchaseRequestProcessor_Rx().handle( httpRequestData);
 
 			ons.subscribe( this::notifyComplete, this::notifyError);
 
@@ -78,9 +79,9 @@ class PurchaseHttpHandlerDispatcher implements PurchaseHttpHandler {
 		context.dispatch("/purchase.jsp");
 	}
 
-	public void notifyComplete(PurchaseRequest purchaseRequest)
+	public void notifyComplete(PurchaseResponse purchaseResponse)
 	{
-		httpServletRequest.setAttribute("purchaseRequest", purchaseRequest);
+		httpServletRequest.setAttribute("purchaseRequest", purchaseResponse);
 		httpServletRequest.setAttribute("message", "");
 		context.dispatch("/purchase.jsp");
 	}
