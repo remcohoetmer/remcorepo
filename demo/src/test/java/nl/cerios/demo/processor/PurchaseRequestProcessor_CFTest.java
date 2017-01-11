@@ -35,7 +35,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 
 		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
 
-		new PurchaseRequestProcessor_CF().handle( requestData, stub).join();
+		new PurchaseRequestProcessor_CF().process( requestData, stub).join();
 
 		Assert.assertNotNull(stub.purchaseResponse);
 		Assert.assertEquals( new Integer( 90), stub.purchaseResponse.getOrderId());
@@ -48,7 +48,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 		requestData.setPurchaseRequestId( 3);
 
 		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
-		new PurchaseRequestProcessor_CF().handle( requestData, stub).join();
+		new PurchaseRequestProcessor_CF().process( requestData, stub).join();
 
 		Assert.assertNull( stub.purchaseResponse);
 		Assert.assertThat( stub.message, CoreMatchers.containsString( "No purchase request"));
@@ -60,7 +60,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 		requestData.setPurchaseRequestId( 0);
 		
 		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
-		new PurchaseRequestProcessor_CF().handle( requestData, stub).join();
+		new PurchaseRequestProcessor_CF().process( requestData, stub).join();
 		
 		Assert.assertNull( stub.purchaseResponse);
 		Assert.assertThat( stub.message, CoreMatchers.containsString( "Invalid location"));
@@ -72,7 +72,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 		requestData.setPurchaseRequestId( 13);
 		
 		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
-		new PurchaseRequestProcessor_CF().handle( requestData, stub).join();
+		new PurchaseRequestProcessor_CF().process( requestData, stub).join();
 		
 		Assert.assertNull( stub.purchaseResponse);
 		Assert.assertThat( stub.message, CoreMatchers.containsString( "Customer validation failed"));

@@ -14,7 +14,7 @@ import nl.cerios.demo.service.ValidationException;
 
 public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 
-	public void handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
+	public void process(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
 		try 
 		{ 

@@ -33,7 +33,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		requestData.setPurchaseRequestId( 10);
 		
 		TestObserver<PurchaseResponse> ts= new TestObserver<>();
-		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
+		new PurchaseRequestProcessor_Rx().process( requestData).subscribe( ts);
 		
 		ts.assertNoErrors();
 	    assertEquals(1, ts.values().size());
@@ -47,7 +47,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		requestData.setPurchaseRequestId( 10);
 		
 		TestObserver<PurchaseResponse> ts= new TestObserver<>();
-		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
+		new PurchaseRequestProcessor_Rx().process( requestData).subscribe( ts);
 		
 		ts.assertNoErrors();
 	    assertEquals(1, ts.values().size());
@@ -61,7 +61,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		requestData.setPurchaseRequestId( 2);
 		
 		TestObserver<PurchaseResponse> ts= new TestObserver<>();
-		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
+		new PurchaseRequestProcessor_Rx().process( requestData).subscribe( ts);
 	
 		Assert.assertThat( ts.errors().get(0).getMessage(), CoreMatchers.containsString( "No purchase request"));
 	}
@@ -72,7 +72,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		requestData.setPurchaseRequestId( 0);
 		
 		TestObserver<PurchaseResponse> ts= new TestObserver<>();
-		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
+		new PurchaseRequestProcessor_Rx().process( requestData).subscribe( ts);
 		
 		ts.assertError(ValidationException.class);
 		Assert.assertThat( ts.errors().get(0).getMessage(), CoreMatchers.containsString( "Invalid location"));
@@ -84,7 +84,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		requestData.setPurchaseRequestId( 13);
 		
 		TestObserver<PurchaseResponse> ts= new TestObserver<>();
-		new PurchaseRequestProcessor_Rx().handle( requestData).subscribe( ts);
+		new PurchaseRequestProcessor_Rx().process( requestData).subscribe( ts);
 		
 		ts.assertError(ValidationException.class);
 		Assert.assertThat( ts.errors().get(0).getMessage(), CoreMatchers.containsString( "Customer validation failed"));

@@ -17,7 +17,7 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 	private static final Logger LOG = Logger.getLogger(PurchaseRequestProcessor_CF.class.getName());
 
 
-	public CompletableFuture<Void> handle(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
+	public CompletableFuture<Void> process(HttpRequestData requestData, PurchaseHttpHandler purchaseHandler)
 	{
 		CompletableFuture<PurchaseRequest> purchaseRequestCF=
 				purchaseRequestController.getPurchaseRequest_CF( requestData.getPurchaseRequestId());

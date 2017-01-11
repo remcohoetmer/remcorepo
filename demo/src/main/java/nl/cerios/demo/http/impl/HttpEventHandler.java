@@ -9,13 +9,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import io.reactivex.Single;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.http.PurchaseHttpHandler;
 import nl.cerios.demo.processor.PurchaseRequestProcessor_CF;
-import nl.cerios.demo.processor.PurchaseRequestProcessor_Rx;
 import nl.cerios.demo.processor.PurchaseRequestProcessor_Sync;
-import nl.cerios.demo.service.PurchaseRequest;
 import nl.cerios.demo.service.PurchaseResponse;
 
 @WebServlet(asyncSupported = true, value = "/WebShop", loadOnStartup = 1)
@@ -56,16 +53,10 @@ class PurchaseHttpHandlerDispatcher implements PurchaseHttpHandler {
 		HttpRequestData httpRequestData= new HttpRequestData();
 		httpRequestData.setPurchaseRequestId( purchaseRequestId);
 		boolean cf= false;
-		boolean rxjava= true;
-		if (rxjava) {
-			Single<PurchaseResponse> ons= new PurchaseRequestProcessor_Rx().handle( httpRequestData);
-
-			ons.subscribe( this::notifyComplete, this::notifyError);
-
-		} else if (cf) {
-			new PurchaseRequestProcessor_CF().handle( httpRequestData, this);
+		if (cf) {
+			new PurchaseRequestProcessor_CF().process( httpRequestData, this);
 		} else {
-			new PurchaseRequestProcessor_Sync().handle( httpRequestData, this);
+			new PurchaseRequestProcessor_Sync().process( httpRequestData, this);
 		}
 	}
 

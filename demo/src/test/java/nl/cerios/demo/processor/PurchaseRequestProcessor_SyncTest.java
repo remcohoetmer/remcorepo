@@ -22,7 +22,7 @@ public class PurchaseRequestProcessor_SyncTest extends PurchaseRequestProcessorT
 		
 		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
 		
-		new PurchaseRequestProcessor_Sync().handle( requestData, stub);
+		new PurchaseRequestProcessor_Sync().process( requestData, stub);
 		
 		
 		Assert.assertEquals( new Integer( 90), stub.purchaseResponse.getOrderId());

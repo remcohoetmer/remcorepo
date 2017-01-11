@@ -11,7 +11,7 @@ import nl.cerios.demo.service.ValidationException;
 
 public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 
-	public Single<PurchaseResponse> handle(HttpRequestData requestData)
+	public Single<PurchaseResponse> process(HttpRequestData requestData)
 	{
 		Single<PurchaseRequest>  purchaseRequestSingle= purchaseRequestController
 				.getPurchaseRequest_Rx( requestData.getPurchaseRequestId());
