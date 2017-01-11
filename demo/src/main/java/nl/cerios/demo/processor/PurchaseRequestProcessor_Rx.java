@@ -45,7 +45,7 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 								.toCompletable();
 
 						return Completable.concatArray( customerValidationCompl, transactionValidationCompl)
-								.andThen( orderService.createOrder_Rx( purchaseRequest))
+								.andThen( orderService.executeOrder_Rx( purchaseRequest))
 								.flatMap( orderData-> purchaseRequestController.update_Rx( purchaseRequest, orderData))
 								.flatMap( purchaseResponse -> {
 									return transactionService.linkOrderToTransaction_Rx(purchaseRequest)

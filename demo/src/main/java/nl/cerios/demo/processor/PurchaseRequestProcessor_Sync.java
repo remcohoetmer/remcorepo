@@ -31,7 +31,7 @@ public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 				throw new ValidationException( transactionValidation.getMessage());
 			}
 
-			OrderData orderData= orderService.createOrder_Sync( purchaseRequest);
+			OrderData orderData= orderService.executeOrder_Sync( purchaseRequest);
 			PurchaseResponse purchaseResponse= purchaseRequestController.update_Sync( purchaseRequest, orderData);
 
 			Status status= transactionService.linkOrderToTransaction_Sync( purchaseRequest);

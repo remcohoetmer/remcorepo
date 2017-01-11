@@ -51,7 +51,7 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 								});
 
 						return CompletableFuture.allOf( customerValidationCF, transactionValidationCF)
-								.thenCompose( dummy -> orderService.createOrder_CF( purchaseRequest))
+								.thenCompose( dummy -> orderService.executeOrder_CF( purchaseRequest))
 								.thenCompose( orderData -> purchaseRequestController.update_CF( purchaseRequest, orderData))
 								.thenCompose( purchaseResponse -> {
 									return transactionService.linkOrderToTransaction_CF( purchaseRequest)
