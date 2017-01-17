@@ -2,7 +2,6 @@ package nl.cerios.demo.service;
 
 import java.util.concurrent.CompletableFuture;
 
-import io.reactivex.Flowable;
 import io.reactivex.Single;
 
 public class TransactionService {

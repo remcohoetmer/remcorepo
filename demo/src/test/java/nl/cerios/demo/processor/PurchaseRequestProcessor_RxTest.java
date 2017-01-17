@@ -1,8 +1,6 @@
 package nl.cerios.demo.processor;
 import static org.junit.Assert.assertEquals;
 
-import java.util.logging.Logger;
-
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,13 +9,11 @@ import org.junit.Test;
 import io.reactivex.observers.TestObserver;
 import nl.cerios.demo.DemoLogManager;
 import nl.cerios.demo.http.HttpRequestData;
-import nl.cerios.demo.service.PurchaseRequest;
 import nl.cerios.demo.service.PurchaseResponse;
 import nl.cerios.demo.service.ValidationException;
 
 
 public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTestBase {
-	private static final Logger LOG = Logger.getLogger(PurchaseRequestProcessor_RxTest.class.getName());
 	@Before
 	public void setUp() throws Exception {
 		addPurchaseRequest( 10, 10, 10);

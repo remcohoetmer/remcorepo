@@ -35,12 +35,12 @@ class PurchaseHttpHandlerDispatcher implements PurchaseHttpHandler {
 	private static final Logger LOG = Logger.getLogger(PurchaseHttpHandlerDispatcher.class.getName());
 	private AsyncContext context;
 	private HttpServletRequest httpServletRequest;
+	@SuppressWarnings("unused")
 	private HttpServletResponse httpServletResponse;
 
 	public void invoke(AsyncContext context) {
 		this.context=context;
 		httpServletRequest = (HttpServletRequest) this.context.getRequest();
-		httpServletResponse = (HttpServletResponse) this.context.getResponse();		
 		final String purchaseRequestIdString= httpServletRequest.getParameter("purchaseRequestId");
 		LOG.info( "Message "+ purchaseRequestIdString);
 
