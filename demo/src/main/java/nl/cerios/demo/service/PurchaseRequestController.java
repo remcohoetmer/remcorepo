@@ -57,16 +57,16 @@ public class PurchaseRequestController {
 		return Single.defer( ()-> Single.just( update( purchaseRequest, orderData)));
 	}
 
-	public PurchaseRequest getPurchaseRequest_Sync(Integer purchaseRequestId) throws ValidationException{
+	public PurchaseRequest retrievePurchaseRequest_Sync(Integer purchaseRequestId) throws ValidationException{
 		return getPurchaseRequest( purchaseRequestId);
 	}
 	
-	public CompletableFuture<PurchaseRequest> getPurchaseRequest_CF(Integer purchaseRequestId)
+	public CompletableFuture<PurchaseRequest> retrievePurchaseRequest_CF(Integer purchaseRequestId)
 	{
 		return CompletableFuture.supplyAsync( transportException( ()-> getPurchaseRequest( purchaseRequestId)));
 	}
 
-	public Single<PurchaseRequest> getPurchaseRequest_Rx(final Integer purchaseRequestId)
+	public Single<PurchaseRequest> retrievePurchaseRequest_Rx(final Integer purchaseRequestId)
 	{
 		// postpone the computation of the value until request time, not build time
 		return Single.defer( ()-> Single.just( getPurchaseRequest( purchaseRequestId)));

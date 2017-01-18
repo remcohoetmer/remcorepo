@@ -9,7 +9,7 @@ import nl.cerios.demo.CF_Utils;
 public class CustomerService {
 	private static final Logger LOG = Logger.getLogger(CustomerService.class.getName());
 
-	public CustomerData getCustomerData_Sync(Integer customerId) throws ValidationException {
+	public CustomerData retrieveCustomerData_Sync(Integer customerId) throws ValidationException {
 		/*
 		LOG.info( Thread.currentThread().getName());
 		new Exception().printStackTrace();
@@ -36,8 +36,8 @@ public class CustomerService {
 		return validation;
 	}
 
-	public CompletableFuture<CustomerData> getCustomerData_CF(Integer customerId) {
-		return CompletableFuture.supplyAsync( CF_Utils.transportException( ()-> getCustomerData_Sync(customerId)));
+	public CompletableFuture<CustomerData> retrieveCustomerData_CF(Integer customerId) {
+		return CompletableFuture.supplyAsync( CF_Utils.transportException( ()-> retrieveCustomerData_Sync(customerId)));
 	}
 
 	public CompletableFuture<CustomerValidation> validateCustomer_CF(CustomerData customerData, LocationConfig locationData) {
@@ -45,7 +45,7 @@ public class CustomerService {
 	}
 
 	public Single<CustomerData> getCustomerData_Rx(Integer customerId) {
-		return Single.defer( ()->Single.just( getCustomerData_Sync(customerId))); 
+		return Single.defer( ()->Single.just( retrieveCustomerData_Sync(customerId))); 
 	}
 
 	public Single<CustomerValidation> validateCustomer_Rx(CustomerData customerData, LocationConfig locationData) {
