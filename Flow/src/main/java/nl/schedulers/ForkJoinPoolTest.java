@@ -109,6 +109,8 @@ public class ForkJoinPoolTest {
 
 		@Override
 		public Integer call() throws Exception {
+			System.out.println( " "+ barrier.isBroken() + " " + barrier.getNumberWaiting());
+			
 			barrier.await();
 			return 1;
 		}
@@ -116,13 +118,13 @@ public class ForkJoinPoolTest {
 
 
 	@Test
-	public void testWorkStealing() throws Exception {
+	public void testWorkStealing() throws Exception {	
 		final int parallelism = 4;
 		final ExecutorService pool = new ForkJoinPool(parallelism);
-		final CyclicBarrier barrier = new CyclicBarrier(3,  ()-> System.out.println("Pass"));
+		final CyclicBarrier barrier = new CyclicBarrier(4,  ()-> System.out.println("Pass"));
 
 		final List<CallableTask> callableTasks = Collections.nCopies(parallelism, new CallableTask(barrier));
-		int result = pool.submit((Callable<Integer>) ( ()-> {
+		int result = pool.submit( ()-> {
 				int res = 0;
 				// Deadlock in invokeAll(), rather than stealing work
 				for (Future<Integer> future : pool.invokeAll(callableTasks)) {
@@ -130,7 +132,7 @@ public class ForkJoinPoolTest {
 				}
 				return res;
 			}
-		)).get();
+		).get();
 		assertEquals(result, parallelism);
 	}
 

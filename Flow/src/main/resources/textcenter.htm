@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+/* target: do not stretch the text to the full width. This is done by setting display:inline on the p element. However, it does work when the property is set on the parent.
+Explanation: an inline element cannot center by definition because it does not stretch to the full width. 
+*/
+.center, .nocenter, .block {
+    border: 3px solid green;
+    margin: 2px;
+}
+.center {
+    text-align: center;
+}
+.center > p {
+	display: inline;
+    background: yellow;
+}
+.nocenter > p {
+	display: inline;
+	text-align: center;
+    background: red;
+}
+.block {
+	width: 200px;
+    height: 200px;
+    
+	
+}
+.block > div {
+	width: 20px;
+    height: 20px;
+    display: inline-block;
+    border: 1px solid purple;
+    background: blue;
+}
+div.d {
+    height: 2px;
+    width: 50%;
+    background-color: powderblue;
+}
+</style>
+</head>
+<body>
+
+<h2>Center Text</h2>
+
+<div class="center">
+  <p>This text is centered.</p>
+</div>
+<div class="nocenter">
+  <p>This text not</p>
+</div>
+
+<p>This text follows</p>
+<div class="block">
+	<div>1</div>
+	<div>1</div>
+	<div>1</div>
+	<div>1</div>
+</div>
+
+<div class="d">tralala</div>
+</body>
+</html>

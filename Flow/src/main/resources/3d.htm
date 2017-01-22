@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#div1 {
+	top: 300px;
+    height: 150px;
+    width: 150px;
+    margin: 50px;
+    padding: 10px;
+    border: 1px solid black;
+        -webkit-perspective: 100px; /* Chrome, Safari, Opera  */
+	position: relative;
+}
+
+#div2 {
+    padding: 50px;
+    position: absolute;
+    border: 1px solid black;
+    background-color: red;
+    -webkit-transform: rotateX(45deg); /* Chrome, Safari, Opera  */
+}
+.wrapper {
+  width: 50%;
+  float: left;
+}
+
+.w1 {
+  perspective: 1000px;
+}
+
+.w2 {
+  perspective: 250px;
+}
+
+.wrapper h1 {
+  text-align: center;
+}
+
+.cube {
+  font-size: 4em;
+  width: 2em;
+  margin: 1.5em auto;
+  transform-style: preserve-3d;
+  transform:  rotateX(-40deg) rotateY(32deg)  translateZ(0.1em) ;
+}
+
+.side {
+  position: absolute;
+  width: 2em;
+  height: 2em;
+  
+  background-color: rgba(255,150,150, .6);
+  border: 1px solid rgba(0,0,0,.5);
+  
+  color: white; 
+  text-align: center;
+  line-height: 2em;
+}
+
+.plane  { transform:                  translateX(0px); }
+.front  { transform:                  translateZ(1em);}
+.top    { transform: rotateX( 90deg)  translateZ(1em);}
+.right  { transform: rotateY( 90deg)  translateZ(1em); }
+.left   { transform: rotateY(-90deg)  translateZ(1em); }
+.bottom { transform: rotateX(-90deg)  translateZ(1em); }
+.back   { transform: rotateY(-180deg) translateZ(1em); }
+.box-2 {
+	background: yellow;
+    border-radius: 6px;
+    border: 1px solid black;
+    width: 100px;
+    height: 16px;
+  transform: skew(10deg, 20deg) translateZ(20px);
+}
+
+</style>
+</head>
+<body>
+ 
+<div class="wrapper w1">
+  <h1><code>perspective: 1000px</code></h1>
+  <div class="cube">
+    <div class="side  plane">X</div>
+    <div class="side  front">1</div>
+    <div class="side   back">6</div>
+    <div class="side  right">4</div>
+    <div class="side   left">3</div>
+    <div class="side    top">5</div>
+    <div class="side bottom">2</div>
+  </div>
+</div>
+<div class="wrapper w2">
+  <h1><code>perspective: 250px</code></h1>
+  <div class="cube">
+    <div class="side  front">1</div>
+    <div class="side   back">6</div>
+    <div class="side  right">4</div>
+    <div class="side   left">3</div>
+    <div class="side    top">5</div>
+    <div class="side bottom">2</div>
+  </div>
+</div>
+<div id="div1">
+  <div id="div2">HELLO</div>
+</div>
+
+<figure class="box-2">Box 2</figure>
+
+</body>
+</html>
