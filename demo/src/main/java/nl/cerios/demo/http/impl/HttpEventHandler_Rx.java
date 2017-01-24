@@ -15,7 +15,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.processor.PurchaseRequestProcessor_Rx;
 
-@WebServlet(asyncSupported = true, value = "/WebShop", loadOnStartup = 1)
+@WebServlet(asyncSupported = true, value = "/WebShop_Rx", loadOnStartup = 1)
 public class HttpEventHandler_Rx extends HttpServlet {
 	private static final Logger LOG = Logger.getLogger(HttpEventHandler_Rx.class.getName());
 	private static final long serialVersionUID = 1L;
