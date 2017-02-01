@@ -22,7 +22,7 @@ public class PurchaseRequestProcessor_CF extends BaseProcessor {
 				purchaseRequestController.retrievePurchaseRequest_CF( requestData.getPurchaseRequestId());
 
 		return purchaseRequestCF.thenCompose( purchaseRequest -> {
-			return customerService.retrieveCustomerData_CF( purchaseRequest.retrieveCustomerId())
+			return customerService.retrieveCustomerData_CF( purchaseRequest.getCustomerId())
 					.thenCompose( customerData-> {
 
 						if (purchaseRequest.getLocationId() == null)

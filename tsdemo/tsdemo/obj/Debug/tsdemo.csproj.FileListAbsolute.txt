@@ -1,0 +1,6 @@
+C:\Users\Remco\git\remcorepo\tsdemo\tsdemo\bin\tsdemo.dll.config
+C:\Users\Remco\git\remcorepo\tsdemo\tsdemo\bin\tsdemo.dll
+C:\Users\Remco\git\remcorepo\tsdemo\tsdemo\bin\tsdemo.pdb
+C:\Users\Remco\git\remcorepo\tsdemo\tsdemo\obj\Debug\tsdemo.csprojResolveAssemblyReference.cache
+C:\Users\Remco\git\remcorepo\tsdemo\tsdemo\obj\Debug\tsdemo.dll
+C:\Users\Remco\git\remcorepo\tsdemo\tsdemo\obj\Debug\tsdemo.pdb
