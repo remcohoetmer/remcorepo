@@ -1,5 +1,4 @@
-﻿///<reference path='app.ts'/>
-
+﻿
 namespace Mankala {
 
     interface PurchaseRequest {
@@ -29,17 +28,18 @@ namespace Mankala {
         OK = 0, NOT_OK = 1
     }
     class CustomerService {
-        static retrieveCustomerData_Sync(customerId: number): CustomerData {
+        retrieveCustomerData(customerId: number): CustomerData {
             return {
                 customerId: customerId
             }
         }
-        static validateCustomer_Sync(customerData: CustomerData, locationData: LocationConfig): CustomerValidation {
+        validateCustomer(customerData: CustomerData, locationData: LocationConfig): CustomerValidation {
             let validation: CustomerValidation = { status: Status.OK, message: null }
             if (customerData.customerId != locationData.locationId) {
                 validation.status = Status.NOT_OK;
             }
-            switch (status.toString) {
+            validation.message = "Customer validation failed";
+            switch (status.valueOf) {
                 case Status.NOT_OK.toString: validation.message = "Customer validation failed"; break;
                 case Status.OK.toString: validation.message = "Customer OK"; break;
             }
@@ -47,14 +47,14 @@ namespace Mankala {
         }
     }
     class PurchaseRequestController {
-        static retrievePurchaseRequest_Sync(id: number): PurchaseRequest {
+        retrievePurchaseRequest(id: number): PurchaseRequest {
             return {
                 purchaseRequestId: id,
                 locationId: 123,
-                customerId: 123,
+                customerId: 12,
             }
         }
-        static update_Sync(purchaseRequest: PurchaseRequest, orderData: OrderData): PurchaseResponse {
+        update(purchaseRequest: PurchaseRequest, orderData: OrderData): PurchaseResponse {
             return {
                 purchaseRequest: purchaseRequest,
                 orderId: orderData.id,
@@ -68,20 +68,20 @@ namespace Mankala {
     interface LocationConfigCache {
         [locationId: number]: LocationConfig;
     }
-    class LocationService_Sync {
-        static retrieveLocationConfig(locationId: number): LocationConfig {
+    class LocationService {
+        static cache: LocationConfigCache = {};
+        retrieveLocationConfig(locationId: number): LocationConfig {
             return {
                 locationId: locationId,
                 name: 'location123',
             }
         }
-        static cache: LocationConfigCache = {};
-        static getLocationConfig(locationId: number): LocationConfig {
-            if (LocationService_Sync.cache[locationId] != undefined) {
-                return LocationService_Sync.cache[locationId];
+        getLocationConfig(locationId: number): LocationConfig {
+            if (LocationService.cache[locationId] != undefined) {
+                return LocationService.cache[locationId];
             }
-            let value = LocationService_Sync.retrieveLocationConfig(locationId);
-            LocationService_Sync.cache[locationId] = value;
+            let value = this.retrieveLocationConfig(locationId);
+            LocationService.cache[locationId] = value;
             return value;
         }
     }
@@ -90,14 +90,14 @@ namespace Mankala {
         message?: string
     }
     class TransactionService {
-        static validate_Sync(purchaseRequest: PurchaseRequest, customerData: CustomerData): TransactionValidation {
+        validate(purchaseRequest: PurchaseRequest, customerData: CustomerData): TransactionValidation {
             if (customerData.customerId != 0) {
                 return { status: Status.OK };
             } else {
                 return { status: Status.NOT_OK, message: "Transfer money failed" };
             }
         }
-        static linkOrderToTransaction_Sync(purchaseRequest: PurchaseRequest): Status {
+        linkOrderToTransaction(purchaseRequest: PurchaseRequest): Status {
             return Status.OK;
         }
     }
@@ -105,17 +105,23 @@ namespace Mankala {
         id: number
     }
     class OrderService {
-        static executeOrder_Sync(purchaseRequest: PurchaseRequest): OrderData {
+        executeOrder(purchaseRequest: PurchaseRequest): OrderData {
             return {
                 id: 90,
             }
         }
     }
     class MailboxHandler {
-        static sendMessage_Sync(message: string): void {
+        sendMessage(message: string): void {
         }
     }
     class BaseProcessor {
+        purchaseRequestController: PurchaseRequestController = new PurchaseRequestController();
+        customerService: CustomerService = new CustomerService();
+        locationService: LocationService = new LocationService();
+        transactionService: TransactionService = new TransactionService();
+        orderService: OrderService = new OrderService();
+        mailboxHandler: MailboxHandler = new MailboxHandler();
         composeLinkingFailedMessage(purchaseResponse: PurchaseResponse): string {
             return "Linking Transaction to Order failed" + purchaseResponse;
         }
@@ -123,23 +129,23 @@ namespace Mankala {
 
     export class RequestHandler extends BaseProcessor {
         process(purchaseRequestId: number): PurchaseResponse {
-            let purchaseRequest: PurchaseRequest = PurchaseRequestController.retrievePurchaseRequest_Sync(purchaseRequestId);
-            let customerData: CustomerData = CustomerService.retrieveCustomerData_Sync(purchaseRequest.customerId);
-            let locationConfig: LocationConfig = LocationService_Sync.getLocationConfig(purchaseRequest.locationId);
-            let customerValidation: CustomerValidation = CustomerService.validateCustomer_Sync(customerData, locationConfig);
+            let purchaseRequest: PurchaseRequest = this.purchaseRequestController.retrievePurchaseRequest(purchaseRequestId);
+            let customerData: CustomerData = this.customerService.retrieveCustomerData(purchaseRequest.customerId);
+            let locationConfig: LocationConfig = this.locationService.getLocationConfig(purchaseRequest.locationId);
+            let customerValidation: CustomerValidation = this.customerService.validateCustomer(customerData, locationConfig);
             if (customerValidation.status == Status.NOT_OK) {
                 throw new Error("Validation Exception " + customerValidation.message);
             }
-            let transactionValidation: TransactionValidation = TransactionService.validate_Sync(purchaseRequest, customerData);
+            let transactionValidation: TransactionValidation = this.transactionService.validate(purchaseRequest, customerData);
             if (transactionValidation.status == Status.NOT_OK) {
                 throw new Error("Validation Exception " + transactionValidation.message);
             }
-            let orderData: OrderData = OrderService.executeOrder_Sync(purchaseRequest);
-            let purchaseResponse: PurchaseResponse = PurchaseRequestController.update_Sync(purchaseRequest, orderData);
+            let orderData: OrderData = this.orderService.executeOrder(purchaseRequest);
+            let purchaseResponse: PurchaseResponse = this.purchaseRequestController.update(purchaseRequest, orderData);
 
-            let status: Status = TransactionService.linkOrderToTransaction_Sync(purchaseRequest);
+            let status: Status = this.transactionService.linkOrderToTransaction(purchaseRequest);
             if (status != Status.OK) {
-                MailboxHandler.sendMessage_Sync(this.composeLinkingFailedMessage(purchaseResponse));
+                this.mailboxHandler.sendMessage(this.composeLinkingFailedMessage(purchaseResponse));
             }
             return purchaseResponse;
         };
