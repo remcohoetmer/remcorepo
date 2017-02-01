@@ -19,7 +19,7 @@ public class PurchaseRequestProcessor_Sync extends BaseProcessor {
 		try 
 		{ 
 			PurchaseRequest purchaseRequest = purchaseRequestController.retrievePurchaseRequest_Sync( requestData.getPurchaseRequestId());
-			CustomerData customerData= customerService.retrieveCustomerData_Sync( purchaseRequest.retrieveCustomerId());
+			CustomerData customerData= customerService.retrieveCustomerData_Sync( purchaseRequest.getCustomerId());
 			LocationConfig locationData= locationService_Sync.getLocationConfig(purchaseRequest.getLocationId());
 
 			CustomerValidation customerValidation = customerService.validateCustomer_Sync( customerData, locationData);

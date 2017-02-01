@@ -1,0 +1,6 @@
+C:\Users\Remco\documents\visual studio 2015\Projects\TypeScriptHTMLApp1\TypeScriptHTMLApp1\bin\TypeScriptHTMLApp1.dll.config
+C:\Users\Remco\documents\visual studio 2015\Projects\TypeScriptHTMLApp1\TypeScriptHTMLApp1\bin\TypeScriptHTMLApp1.dll
+C:\Users\Remco\documents\visual studio 2015\Projects\TypeScriptHTMLApp1\TypeScriptHTMLApp1\bin\TypeScriptHTMLApp1.pdb
+C:\Users\Remco\documents\visual studio 2015\Projects\TypeScriptHTMLApp1\TypeScriptHTMLApp1\obj\Debug\TypeScriptHTMLApp1.csprojResolveAssemblyReference.cache
+C:\Users\Remco\documents\visual studio 2015\Projects\TypeScriptHTMLApp1\TypeScriptHTMLApp1\obj\Debug\TypeScriptHTMLApp1.dll
+C:\Users\Remco\documents\visual studio 2015\Projects\TypeScriptHTMLApp1\TypeScriptHTMLApp1\obj\Debug\TypeScriptHTMLApp1.pdb
