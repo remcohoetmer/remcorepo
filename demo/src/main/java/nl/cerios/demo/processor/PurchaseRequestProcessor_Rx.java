@@ -16,7 +16,7 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 		Single<PurchaseRequest>  purchaseRequestSingle= purchaseRequestController
 				.retrievePurchaseRequest_Rx( requestData.getPurchaseRequestId());
 		return purchaseRequestSingle.flatMap(purchaseRequest -> {
-			return customerService.getCustomerData_Rx( purchaseRequest.getCustomerId())
+			return customerService.getCustomerData_Rx( purchaseRequest.retrieveCustomerId())
 					.flatMap( customerData -> {
 
 						if (purchaseRequest.getLocationId() == null)

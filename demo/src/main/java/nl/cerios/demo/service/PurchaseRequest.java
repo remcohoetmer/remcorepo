@@ -25,7 +25,7 @@ public class PurchaseRequest {
 	public void setLocationId(Integer locationId) {
 		this.locationId = locationId;
 	}
-	public Integer getCustomerId() {
+	public Integer retrieveCustomerId() {
 		return customerId;
 	}
 	public void setCustomerId(Integer customerId) {
