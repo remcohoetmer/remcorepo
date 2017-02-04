@@ -1,19 +1,22 @@
-﻿
-namespace Mankala {
-
-    interface PurchaseRequest {
-        purchaseRequestId: number;
-        locationId: number;
-        customerId: number;
-        orderId?: number;
-        transactionId?: number;
+﻿"use strict";
+namespace ProcessHandler {
+    class PurchaseRequest {
+        orderId: number;
+        transactionId: number;
+        public constructor(public purchaseRequestId: number,
+            public locationId: number,
+            public customerId: number) {
+        }
     }
 
-    class PurchaseResponse {
-        orderId: number;
-        purchaseRequest: PurchaseRequest;
+    export class PurchaseResponse {
         public toString = (): string => {
-            return `orderId: ${this.orderId})`;
+            return `orderId: ${this.orderId}`;
+        }
+        public getAsString(): string {
+            return this.toString();
+        }
+        public constructor(private orderId: number, private purchaseRequest: PurchaseRequest) {
         }
     }
 
@@ -48,17 +51,10 @@ namespace Mankala {
     }
     class PurchaseRequestController {
         retrievePurchaseRequest(id: number): PurchaseRequest {
-            return {
-                purchaseRequestId: id,
-                locationId: 123,
-                customerId: 12,
-            }
+            return new PurchaseRequest(id, 123, 123);
         }
         update(purchaseRequest: PurchaseRequest, orderData: OrderData): PurchaseResponse {
-            return {
-                purchaseRequest: purchaseRequest,
-                orderId: orderData.id,
-            };
+            return new PurchaseResponse(orderData.id, purchaseRequest);
         }
     }
     interface LocationConfig {
@@ -77,7 +73,7 @@ namespace Mankala {
             }
         }
         getLocationConfig(locationId: number): LocationConfig {
-            if (LocationService.cache[locationId] != undefined) {
+            if (LocationService.cache[locationId]) {
                 return LocationService.cache[locationId];
             }
             let value = this.retrieveLocationConfig(locationId);
