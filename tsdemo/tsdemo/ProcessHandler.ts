@@ -1,152 +1,141 @@
 ﻿"use strict";
-namespace ProcessHandler {
-    class PurchaseRequest {
-        orderId: number;
-        transactionId: number;
-        public constructor(public purchaseRequestId: number,
-            public locationId: number,
-            public customerId: number) {
-        }
-    }
 
-    export class PurchaseResponse {
-        public toString = (): string => {
-            return `orderId: ${this.orderId}`;
-        }
-        public getAsString(): string {
-            return this.toString();
-        }
-        public constructor(private orderId: number, private purchaseRequest: PurchaseRequest) {
-        }
-    }
-
-    interface CustomerData {
-        customerId: number
-    }
-    interface CustomerValidation {
-        status: Status,
-        message: string,
-    }
-    enum Status {
-        OK = 0, NOT_OK = 1
-    }
-    class CustomerService {
-        retrieveCustomerData(customerId: number): CustomerData {
-            return {
-                customerId: customerId
-            }
-        }
-        validateCustomer(customerData: CustomerData, locationData: LocationConfig): CustomerValidation {
-            let validation: CustomerValidation = { status: Status.OK, message: null }
-            if (customerData.customerId != locationData.locationId) {
-                validation.status = Status.NOT_OK;
-            }
-            validation.message = "Customer validation failed";
-            switch (status.valueOf) {
-                case Status.NOT_OK.toString: validation.message = "Customer validation failed"; break;
-                case Status.OK.toString: validation.message = "Customer OK"; break;
-            }
-            return validation;
-        }
-    }
-    class PurchaseRequestController {
-        retrievePurchaseRequest(id: number): PurchaseRequest {
-            return new PurchaseRequest(id, 123, 123);
-        }
-        update(purchaseRequest: PurchaseRequest, orderData: OrderData): PurchaseResponse {
-            return new PurchaseResponse(orderData.id, purchaseRequest);
-        }
-    }
-    interface LocationConfig {
-        locationId: number;
-        name: string;
-    }
-    interface LocationConfigCache {
-        [locationId: number]: LocationConfig;
-    }
-    class LocationService {
-        static cache: LocationConfigCache = {};
-        retrieveLocationConfig(locationId: number): LocationConfig {
-            return {
-                locationId: locationId,
-                name: 'location123',
-            }
-        }
-        getLocationConfig(locationId: number): LocationConfig {
-            if (LocationService.cache[locationId]) {
-                return LocationService.cache[locationId];
-            }
-            let value = this.retrieveLocationConfig(locationId);
-            LocationService.cache[locationId] = value;
-            return value;
-        }
-    }
-    interface TransactionValidation {
-        status: Status,
-        message?: string
-    }
-    class TransactionService {
-        validate(purchaseRequest: PurchaseRequest, customerData: CustomerData): TransactionValidation {
-            if (customerData.customerId != 0) {
-                return { status: Status.OK };
-            } else {
-                return { status: Status.NOT_OK, message: "Transfer money failed" };
-            }
-        }
-        linkOrderToTransaction(purchaseRequest: PurchaseRequest): Status {
-            return Status.OK;
-        }
-    }
-    interface OrderData {
-        id: number
-    }
-    class OrderService {
-        executeOrder(purchaseRequest: PurchaseRequest): OrderData {
-            return {
-                id: 90,
-            }
-        }
-    }
-    class MailboxHandler {
-        sendMessage(message: string): void {
-        }
-    }
-    class BaseProcessor {
-        purchaseRequestController: PurchaseRequestController = new PurchaseRequestController();
-        customerService: CustomerService = new CustomerService();
-        locationService: LocationService = new LocationService();
-        transactionService: TransactionService = new TransactionService();
-        orderService: OrderService = new OrderService();
-        mailboxHandler: MailboxHandler = new MailboxHandler();
-        composeLinkingFailedMessage(purchaseResponse: PurchaseResponse): string {
-            return "Linking Transaction to Order failed" + purchaseResponse;
-        }
-    }
-
-    export class RequestHandler extends BaseProcessor {
-        process(purchaseRequestId: number): PurchaseResponse {
-            let purchaseRequest: PurchaseRequest = this.purchaseRequestController.retrievePurchaseRequest(purchaseRequestId);
-            let customerData: CustomerData = this.customerService.retrieveCustomerData(purchaseRequest.customerId);
-            let locationConfig: LocationConfig = this.locationService.getLocationConfig(purchaseRequest.locationId);
-            let customerValidation: CustomerValidation = this.customerService.validateCustomer(customerData, locationConfig);
-            if (customerValidation.status == Status.NOT_OK) {
-                throw new Error("Validation Exception " + customerValidation.message);
-            }
-            let transactionValidation: TransactionValidation = this.transactionService.validate(purchaseRequest, customerData);
-            if (transactionValidation.status == Status.NOT_OK) {
-                throw new Error("Validation Exception " + transactionValidation.message);
-            }
-            let orderData: OrderData = this.orderService.executeOrder(purchaseRequest);
-            let purchaseResponse: PurchaseResponse = this.purchaseRequestController.update(purchaseRequest, orderData);
-
-            let status: Status = this.transactionService.linkOrderToTransaction(purchaseRequest);
-            if (status != Status.OK) {
-                this.mailboxHandler.sendMessage(this.composeLinkingFailedMessage(purchaseResponse));
-            }
-            return purchaseResponse;
-        };
-        public constructor() {
-            super();
-        }
+class PurchaseRequest {
+    orderId: number;
+    transactionId: number;
+    public constructor(public purchaseRequestId: number,
+        public locationId: number,
+        public customerId: number) {
     }
 }
+
+export class PurchaseResponse {
+    public toString = (): string => {
+        return `orderId: ${this.orderId}`;
+    }
+    public getAsString(): string {
+        return this.toString();
+    }
+    public constructor(private orderId: number, private purchaseRequest: PurchaseRequest) {
+    }
+}
+
+class CustomerData {
+    public constructor(public customerId: number) { }
+}
+class CustomerValidation {
+    public constructor(public status: Status,
+        public message: string) {
+    }
+}
+enum Status {
+    OK = 0, NOT_OK = 1
+}
+class CustomerService {
+    retrieveCustomerData(customerId: number): CustomerData {
+        return new CustomerData(customerId);
+    }
+    validateCustomer(customerData: CustomerData, locationData: LocationConfig): CustomerValidation {
+        if (customerData.customerId != locationData.locationId) {
+            return new CustomerValidation(Status.NOT_OK, "Customer validation failed");
+        }
+        return new CustomerValidation(Status.OK, "Customer OK");
+    }
+}
+class PurchaseRequestController {
+    retrievePurchaseRequest(id: number): PurchaseRequest {
+        return new PurchaseRequest(id, 123, 123);
+    }
+    update(purchaseRequest: PurchaseRequest, orderData: OrderData): PurchaseResponse {
+        return new PurchaseResponse(orderData.id, purchaseRequest);
+    }
+}
+class LocationConfig {
+    public constructor(public locationId: number, public name: string) {
+    }
+}
+interface LocationConfigCache {
+    [locationId: number]: LocationConfig;
+}
+class LocationService {
+    static cache: LocationConfigCache = {};
+    retrieveLocationConfig(locationId: number): LocationConfig {
+        return new LocationConfig(locationId, 'location123');
+    }
+    getLocationConfig(locationId: number): LocationConfig {
+        if (LocationService.cache[locationId]) {
+            return LocationService.cache[locationId];
+        }
+        let value = this.retrieveLocationConfig(locationId);
+        LocationService.cache[locationId] = value;
+        return value;
+    }
+}
+class TransactionValidation {
+    public constructor(public status: Status, public message: string) { }
+}
+class TransactionService {
+    validate(purchaseRequest: PurchaseRequest, customerData: CustomerData): TransactionValidation {
+        if (customerData.customerId != 0) {
+            return new TransactionValidation(Status.OK, '');
+        } else {
+            return new TransactionValidation(Status.NOT_OK, "Transfer money failed");
+        }
+    }
+    linkOrderToTransaction(purchaseRequest: PurchaseRequest): Status {
+        return Status.OK;
+    }
+}
+class OrderData {
+    public constructor(public id: number) { }
+}
+class OrderService {
+    executeOrder(purchaseRequest: PurchaseRequest): OrderData {
+        return new OrderData(90);
+    }
+}
+class MailboxHandler {
+    sendMessage(message: string): void {
+    }
+}
+export class BaseProcessor {
+    purchaseRequestController = new PurchaseRequestController();
+    customerService = new CustomerService();
+    locationService = new LocationService();
+    transactionService = new TransactionService();
+    orderService = new OrderService();
+    mailboxHandler = new MailboxHandler();
+    composeLinkingFailedMessage(purchaseResponse: PurchaseResponse): string {
+        return "Linking Transaction to Order failed" + purchaseResponse;
+    }
+    public constructor() {
+    }
+}
+
+export class RequestHandler extends BaseProcessor {
+    public process(purchaseRequestId: number): PurchaseResponse {
+        let purchaseRequest = this.purchaseRequestController.retrievePurchaseRequest(purchaseRequestId);
+        let customerData = this.customerService.retrieveCustomerData(purchaseRequest.customerId);
+        let locationConfig = this.locationService.getLocationConfig(purchaseRequest.locationId);
+        let customerValidation = this.customerService.validateCustomer(customerData, locationConfig);
+        if (customerValidation.status == Status.NOT_OK) {
+            throw new Error("Validation Exception " + customerValidation.message);
+        }
+        let transactionValidation = this.transactionService.validate(purchaseRequest, customerData);
+        if (transactionValidation.status == Status.NOT_OK) {
+            throw new Error("Validation Exception " + transactionValidation.message);
+        }
+        let orderData = this.orderService.executeOrder(purchaseRequest);
+        let purchaseResponse = this.purchaseRequestController.update(purchaseRequest, orderData);
+
+        let status = this.transactionService.linkOrderToTransaction(purchaseRequest);
+        if (status != Status.OK) {
+            this.mailboxHandler.sendMessage(this.composeLinkingFailedMessage(purchaseResponse));
+        }
+        return purchaseResponse;
+    };
+    public constructor() {
+        super();
+    }
+}
+

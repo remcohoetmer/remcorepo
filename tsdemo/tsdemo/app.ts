@@ -1,8 +1,8 @@
-﻿///<reference path='ProcessHandler.ts'/>
-
-
-
-
+﻿
+import {Remco} from "./Remco"
+import {PurchaseResponse, RequestHandler} from "./ProcessHandler"
 var el = document.getElementById('content');
-let result: ProcessHandler.PurchaseResponse = new ProcessHandler.RequestHandler().process(1);
+//let result = new Remco();
+let result: PurchaseResponse = new RequestHandler().process(1);
 el.innerHTML = "Result = " + result.getAsString(); //toString()) werkt niet
+//el.innerHTML = "Result = " ; 
