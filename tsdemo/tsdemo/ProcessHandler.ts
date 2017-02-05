@@ -10,11 +10,8 @@ class PurchaseRequest {
 }
 
 export class PurchaseResponse {
-    public toString = (): string => {
+    public toString(): string {
         return `orderId: ${this.orderId}`;
-    }
-    public getAsString(): string {
-        return this.toString();
     }
     public constructor(private orderId: number, private purchaseRequest: PurchaseRequest) {
     }
@@ -33,9 +30,11 @@ enum Status {
 }
 class CustomerService {
     retrieveCustomerData(customerId: number): CustomerData {
+        console.log("retrieve customer");
         return new CustomerData(customerId);
     }
     validateCustomer(customerData: CustomerData, locationData: LocationConfig): CustomerValidation {
+        console.log("validate customer");
         if (customerData.customerId != locationData.locationId) {
             return new CustomerValidation(Status.NOT_OK, "Customer validation failed");
         }
@@ -44,9 +43,11 @@ class CustomerService {
 }
 class PurchaseRequestController {
     retrievePurchaseRequest(id: number): PurchaseRequest {
+        console.log("retrieve purchase");
         return new PurchaseRequest(id, 123, 123);
     }
     update(purchaseRequest: PurchaseRequest, orderData: OrderData): PurchaseResponse {
+        console.log("update purchase");
         return new PurchaseResponse(orderData.id, purchaseRequest);
     }
 }
@@ -60,7 +61,7 @@ interface LocationConfigCache {
 class LocationService {
     static cache: LocationConfigCache = {};
     retrieveLocationConfig(locationId: number): LocationConfig {
-        return new LocationConfig(locationId, 'location123');
+        return new LocationConfig(locationId, 'Location Name');
     }
     getLocationConfig(locationId: number): LocationConfig {
         if (LocationService.cache[locationId]) {
@@ -76,6 +77,7 @@ class TransactionValidation {
 }
 class TransactionService {
     validate(purchaseRequest: PurchaseRequest, customerData: CustomerData): TransactionValidation {
+        console.log("validate transaction");
         if (customerData.customerId != 0) {
             return new TransactionValidation(Status.OK, '');
         } else {
@@ -91,14 +93,16 @@ class OrderData {
 }
 class OrderService {
     executeOrder(purchaseRequest: PurchaseRequest): OrderData {
+        console.log("executeOrder");
         return new OrderData(90);
     }
 }
 class MailboxHandler {
     sendMessage(message: string): void {
+        console.log("sending message");
     }
 }
-export class BaseProcessor {
+abstract class BaseProcessor {
     purchaseRequestController = new PurchaseRequestController();
     customerService = new CustomerService();
     locationService = new LocationService();
@@ -108,12 +112,10 @@ export class BaseProcessor {
     composeLinkingFailedMessage(purchaseResponse: PurchaseResponse): string {
         return "Linking Transaction to Order failed" + purchaseResponse;
     }
-    public constructor() {
-    }
 }
 
 export class RequestHandler extends BaseProcessor {
-    public process(purchaseRequestId: number): PurchaseResponse {
+    public process(purchaseRequestId: number, callback: (PurchaseResponse) => void): void {
         let purchaseRequest = this.purchaseRequestController.retrievePurchaseRequest(purchaseRequestId);
         let customerData = this.customerService.retrieveCustomerData(purchaseRequest.customerId);
         let locationConfig = this.locationService.getLocationConfig(purchaseRequest.locationId);
@@ -132,10 +134,7 @@ export class RequestHandler extends BaseProcessor {
         if (status != Status.OK) {
             this.mailboxHandler.sendMessage(this.composeLinkingFailedMessage(purchaseResponse));
         }
-        return purchaseResponse;
+        callback( purchaseResponse);
     };
-    public constructor() {
-        super();
-    }
 }
 

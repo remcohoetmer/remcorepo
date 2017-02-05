@@ -29,6 +29,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="ProcessHandler.ts" />
+    <TypeScriptCompile Include="Util.ts" />
   </ItemGroup>
   <ItemGroup>
     <None Include="web.Debug.config">
