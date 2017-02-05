@@ -38,7 +38,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
 		new PurchaseRequestProcessor_CF().process( requestData, stub).join();
 
 		Assert.assertNotNull(stub.purchaseResponse);
-		Assert.assertEquals( new Integer( 90), stub.purchaseResponse.getOrderId());
+		Assert.assertEquals( new Integer( 90), stub.purchaseResponse.getPurchaseRequest().getOrderId());
 	}
 
 	@Test

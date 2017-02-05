@@ -3,16 +3,8 @@ package nl.cerios.demo.service;
 import io.reactivex.Observable;
 
 public class PurchaseResponse {
-	private Integer orderId;
 	private PurchaseRequest purchaseRequest; 
 	private Observable<CharSequence> document;
-	
-	public Integer getOrderId() {
-		return orderId;
-	}
-	public void setOrderId(Integer orderId) {
-		this.orderId = orderId;
-	}
 
 	public Observable<CharSequence> getDocument() {
 		return document;
@@ -27,9 +19,11 @@ public class PurchaseResponse {
 		this.purchaseRequest = purchaseRequest;
 	}
 	@Override
-    public String toString() {
+	public String toString() {
 		StringBuffer sb= new StringBuffer();
-		sb.append( " orderId ").append( orderId);
+		if (purchaseRequest!=  null) {
+			sb.append(purchaseRequest);
+		}
 		return sb.toString();
 	}
 }

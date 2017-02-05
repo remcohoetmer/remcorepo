@@ -34,7 +34,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		ts.assertNoErrors();
 	    assertEquals(1, ts.values().size());
 	    PurchaseResponse purchaseResponse= ts.values().get(0);
-		Assert.assertEquals( new Integer( 90), purchaseResponse.getOrderId());
+		Assert.assertEquals( new Integer( 90), purchaseResponse.getPurchaseRequest().getOrderId());
 	}
 	
 	@Test
@@ -48,7 +48,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
 		ts.assertNoErrors();
 	    assertEquals(1, ts.values().size());
 	    PurchaseResponse purchaseResponse= ts.values().get(0);
-		Assert.assertEquals( new Integer( 90), purchaseResponse.getOrderId());
+		Assert.assertEquals( new Integer( 90), purchaseResponse.getPurchaseRequest().getOrderId());
 	}
 
 	@Test

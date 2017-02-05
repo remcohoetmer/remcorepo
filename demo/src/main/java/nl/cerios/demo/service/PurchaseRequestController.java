@@ -25,8 +25,9 @@ public class PurchaseRequestController {
 	}
 	
 	private PurchaseResponse update(PurchaseRequest purchaseRequest, OrderData orderData) {
+		purchaseRequest.setOrderId( orderData.getId());
 		PurchaseResponse purchaseResponse= new PurchaseResponse();
-		purchaseResponse.setOrderId( orderData.getId());
+		purchaseResponse.setPurchaseRequest(purchaseRequest);
 		return purchaseResponse;
 	}
 	

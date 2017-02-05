@@ -27,7 +27,7 @@ public class SchedulingTest {
     	HttpRequestData requestData= new HttpRequestData();
 		requestData.setPurchaseRequestId( 10);
 		Single<PurchaseResponse> single= new PurchaseRequestProcessor_Rx().process( requestData);
-		Consumer<? super PurchaseResponse> onSuccess = v -> LOG.info( "order id: " + v.getOrderId() + " "+ Thread.currentThread().getName());
+		Consumer<? super PurchaseResponse> onSuccess = v -> LOG.info( "order id: " + v.getPurchaseRequest().getOrderId() + " "+ Thread.currentThread().getName());
 		single.observeOn(Schedulers.newThread()).subscribeOn(Schedulers.from( ForkJoinPool.commonPool()))
 		.subscribe(onSuccess);
 		single.observeOn(Schedulers.io()).subscribeOn(Schedulers.from( ForkJoinPool.commonPool()))
