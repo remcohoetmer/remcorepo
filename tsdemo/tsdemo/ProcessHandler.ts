@@ -1,8 +1,35 @@
 ﻿"use strict";
+import {HTMLBuilder} from "./Util"
+
+function getJSON(url) {
+    var req = new XMLHttpRequest();
+    req.open('get', url, false);
+    req.send(null);
+    if (req.status == 200) {
+        return JSON.parse( req.responseText);
+    } else {
+        throw new Error(req.statusText);
+    }
+}
+
+var builder = new HTMLBuilder();
+
+function getService(service, url) {
+        var startTime = new Date();
+        let json = getJSON(url);
+        builder.addMessageRow(startTime, new Date(), service, JSON.stringify(json));
+        return json;
+}
 
 class PurchaseRequest {
     orderId: number;
     transactionId: number;
+    public toString(): string {
+        return `purchaseRequestId: ${this.purchaseRequestId}\n` +
+            `locationId: ${this.locationId} \n` +
+            `customerId: ${this.customerId}\n` +
+            `orderId: ${this.orderId}`;
+    }
     public constructor(public purchaseRequestId: number,
         public locationId: number,
         public customerId: number) {
@@ -11,7 +38,7 @@ class PurchaseRequest {
 
 export class PurchaseResponse {
     public toString(): string {
-        return `orderId: ${this.orderId}`;
+        return `orderId: ${this.orderId}\n` + this.purchaseRequest.toString();
     }
     public constructor(private orderId: number, private purchaseRequest: PurchaseRequest) {
     }
@@ -42,9 +69,9 @@ class CustomerService {
     }
 }
 class PurchaseRequestController {
-    retrievePurchaseRequest(id: number): PurchaseRequest {
-        console.log("retrieve purchase");
-        return new PurchaseRequest(id, 123, 123);
+    retrievePurchaseRequest(id: number) : PurchaseRequest {
+        let data = <PurchaseRequest>getService('retrieve purchase', 'service/purchase/' + id + '.json');
+        return new PurchaseRequest(data.purchaseRequestId, data.locationId, data.customerId);
     }
     update(purchaseRequest: PurchaseRequest, orderData: OrderData): PurchaseResponse {
         console.log("update purchase");
@@ -134,7 +161,7 @@ export class RequestHandler extends BaseProcessor {
         if (status != Status.OK) {
             this.mailboxHandler.sendMessage(this.composeLinkingFailedMessage(purchaseResponse));
         }
-        callback( purchaseResponse);
+        callback(purchaseResponse);
     };
 }
 
