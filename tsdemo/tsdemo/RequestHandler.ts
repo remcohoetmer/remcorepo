@@ -231,14 +231,18 @@ export class RequestHandler extends BaseProcessor {
         let customerData = await this.customerService.retrieveCustomerData(purchaseRequest.customerId);
         let locationConfig = await this.locationService.getLocationConfig(purchaseRequest.locationId);
 
-        let customerValidation = await this.customerService.validateCustomer(customerData, locationConfig);
+        let customerValidationpPromise = this.customerService.validateCustomer(customerData, locationConfig);
+        let transactionValidationPromise = this.transactionService.validate(purchaseRequest, customerData);
+        let [customerValidation, transactionValidation] =
+            await Promise.all([customerValidationpPromise, transactionValidationPromise]);
+
         if (customerValidation.status == Status.NOT_OK) {
             throw new Error("Validation Exception " + customerValidation.message);
         }
-        let transactionValidation = await this.transactionService.validate(purchaseRequest, customerData);
         if (transactionValidation.status == Status.NOT_OK) {
             throw new Error("Validation Exception " + transactionValidation.message);
         }
+
         let orderData = await this.orderService.executeOrder(purchaseRequest);
         let purchaseResponse = await this.purchaseRequestController.update(purchaseRequest, orderData)
         let status = await this.transactionService.linkOrderToTransaction(purchaseRequest);
