@@ -77,17 +77,16 @@ class HTTPClient {
 let hTTPClient = new HTTPClient();
 
 export class PurchaseRequest {
+    purchaseRequestId: number;
+    locationId: number;
+    customerId: number;
     orderId: number;
     transactionId: number;
     public toString(): string {
-        return `purchaseRequestId: ${this.purchaseRequestId}\n` +
-            `locationId: ${this.locationId} \n` +
-            `customerId: ${this.customerId}\n` +
-            `orderId: ${this.orderId}`;
-    }
-    public constructor(public purchaseRequestId: number,
-        public locationId: number,
-        public customerId: number) {
+        return `purchaseRequestId: ${this.purchaseRequestId}
+            locationId: ${this.locationId}
+            customerId: ${this.customerId}
+            orderId: ${this.orderId}`;
     }
 }
 
@@ -99,22 +98,22 @@ export class PurchaseResponse {
     }
 }
 
-export class CustomerData {
+class CustomerData {
     public constructor(public customerId: number) { }
 }
-export class CustomerValidation {
+class CustomerValidation {
     public toString(): string {
-        return `status: ${this.status}\n` +
-            `message: ${this.message}`;
+        return `status: ${this.status}
+                message: ${this.message}`;
     }
     public constructor(public status: Status,
         public message: string) {
     }
 }
-export enum Status {
+enum Status {
     OK = 0, NOT_OK = 1
 }
-export class CustomerService {
+class CustomerService {
     retrieveCustomerData(customerId: number): Promise<CustomerData> {
         return hTTPClient.getService('retrieve customer', `customer/${customerId}.json`).then(
             data => {
@@ -125,7 +124,7 @@ export class CustomerService {
     validateCustomer(customerData: CustomerData, locationData: LocationConfig): Promise<CustomerValidation> {
         let validation: CustomerValidation;
         if (customerData.customerId != 10) {
-            validation= new CustomerValidation(Status.NOT_OK, "Customer validation failed");
+            validation = new CustomerValidation(Status.NOT_OK, "Customer validation failed");
         } else {
             validation = new CustomerValidation(Status.OK, "Customer OK");
         }
@@ -133,13 +132,10 @@ export class CustomerService {
         return Promise.resolve(validation);
     }
 }
-export class PurchaseRequestController {
+class PurchaseRequestController {
     retrievePurchaseRequest(purchaseRequestId: number): Promise<PurchaseRequest> {
         return hTTPClient.getService('retrieve purchase', `purchase/${purchaseRequestId}.json`).then(
-            data => {
-                let prData = <PurchaseRequest>(<any>data);
-                return new PurchaseRequest(prData.purchaseRequestId, prData.locationId, prData.customerId);
-            });
+            json => Object.assign(new PurchaseRequest(), json));
     }
     update(purchaseRequest: PurchaseRequest, orderData: OrderData): Promise<PurchaseResponse> {
         purchaseRequest.orderId = orderData.orderId;
@@ -148,27 +144,22 @@ export class PurchaseRequestController {
     }
 }
 
-export class LocationConfig {
+class LocationConfig {
+    locationId: number;
+    name: string;
     public toString(): string {
-        return `locationId: ${this.locationId}\n` +
-            `name: ${this.name}`;
-    }
-    public constructor(public locationId: number, public name: string) {
+        return `locationId: ${this.locationId}
+            name: ${this.name}`;
     }
 }
 interface LocationConfigCache {
     [locationId: number]: LocationConfig;
 }
-
-export class LocationService {
+class LocationService {
     static cache: LocationConfigCache = {};
     retrieveLocationConfig(locationId: number): Promise<LocationConfig> {
         return hTTPClient.getService('retrieve location', `location/${locationId}.json`).then(
-            data => {
-                let locationData = <LocationConfig>(<any>data);
-                return new LocationConfig(locationData.locationId, locationData.name);
-            });
-
+            json => Object.assign(new LocationConfig(), json));
     }
     getLocationConfig(locationId: number): Promise<LocationConfig> {
         let cacheValue = LocationService.cache[locationId];
@@ -185,8 +176,8 @@ export class LocationService {
 }
 export class TransactionValidation {
     public toString(): string {
-        return `status: ${this.status}\n` +
-            `message: ${this.message}`;
+        return `status: ${this.status}
+            message: ${this.message}`;
     }
     public constructor(public status: Status, public message: string) { }
 }
@@ -202,20 +193,17 @@ export class TransactionService {
         return Promise.resolve(validation);
     }
     linkOrderToTransaction(purchaseRequest: PurchaseRequest): Promise<Status> {
-        messageHandler.addMessage(new Date(), "link order",'');
+        messageHandler.addMessage(new Date(), "link order", '');
         return Promise.resolve(Status.OK);
     }
 }
 export class OrderData {
-    public constructor(public orderId: number) { }
+    orderId: number;
 }
 export class OrderService {
     executeOrder(purchaseRequest: PurchaseRequest): Promise<OrderData> {
         return hTTPClient.getService('executeOrder', `order/${purchaseRequest.purchaseRequestId}.json`).then(
-            data => {
-                let orderData = <OrderData>(<any>data);
-                return new OrderData(orderData.orderId);
-            });
+            json => Object.assign(new OrderData, json));
     }
 }
 export class MailboxHandler {
