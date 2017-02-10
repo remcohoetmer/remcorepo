@@ -5,10 +5,16 @@ import {PurchaseResponse, RequestHandler} from "./RequestHandler"
 class Starter {
     messageHandler = new MessageHandler();
     spinner = <HTMLDivElement>document.querySelector('.spinner');
+
+    constructor() {
+//        this.start = this.start.bind(this);
+        this.startFromButton = this.startFromButton.bind(this);
+        document.getElementById("startButton").onclick = this.startFromButton;
+    }
     public start(requestId: number) {
         this.spinner.style.display = 'block';
         this.messageHandler.clearMessages();
-
+        
         new RequestHandler().process(requestId).then(
             purchaseResponse => {
                 this.messageHandler.addMessage(undefined, 'result', purchaseResponse.toString());
@@ -21,15 +27,10 @@ class Starter {
     }
     public startFromButton(event: MouseEvent) {
         let input = <HTMLInputElement>document.getElementById("requestID");
-        starter.start(parseInt(input.value));// TODO: investigate why "this" cannot be used
-    }
-    public initialise() {
-        let startButton = <HTMLButtonElement>document.getElementById("startButton");
-        startButton.onclick = this.startFromButton;
+        this.start(parseInt(input.value));
     }
 }
 let starter = new Starter();
-starter.initialise();
 starter.start(123);
 
 /*
