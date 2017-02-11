@@ -12,10 +12,27 @@
     <div class="network-fake">
         <label><input type="checkbox"> Fake network delay</label>
     </div>
-
-    <svg class="spinner" viewBox="0 0 100 100" width="20" height="20">
-        <circle cx="50" cy="50" r="42" transform="rotate(-90,50,50)" />
-    </svg>
+    <div id="controlDiv">
+        <form name="controlForm" action="">
+            Request ID<input id="requestID" type="number" name="requestID" />
+            <button id="startButton" type="button">Start</button>
+            <svg class="spinner" viewBox="0 0 100 100" width="20" height="20" display="inline">
+                <circle cx="50" cy="50" r="42" transform="rotate(-90,50,50)" />
+            </svg>
+        </form>
+    </div>
+    
+    <div class="diagram">
+        <div id="retpur" class="process"><div ><p>Retrieve Purchase Request</p></div></div>
+        <div id="retcus" class="process"><div><p>Retrieve Customer Data</p></div></div>
+        <div id="retloc" class="process"><div><p>Retrieve Location Config</p></div></div>
+        <div id="valcus" class="process"><div><p>Validate Customer</p></div></div>
+        <div id="valtra" class="process"><div><p>Validate Transaction</p></div></div>
+        <div id="exeord" class="process"><div><p>Execute Order</p></div></div>
+        <div id="updpur" class="process"><div><p>Update Purchase Request with Order</p></div></div>
+        <div id="linord" class="process"><div><p>Link Order to Transaction</p></div></div>
+        <div id="snderr" class="process"><div><p>Send Error Message</p></div></div>
+    </div>
 
     <table id="messages">
         <thead>
@@ -28,11 +45,6 @@
         </thead>
         <tbody id="tbody"></tbody>
     </table>
-    <div id="controlDiv">
-        <form name="controlForm" action="">
-            Request ID<input id="requestID" type="number" name="requestID" />
-            <button id="startButton" type="button">Start</button>
-        </form>
-    </div>
+
 </body>
 </html>

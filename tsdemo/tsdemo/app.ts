@@ -7,11 +7,12 @@ class Starter {
     spinner = <HTMLDivElement>document.querySelector('.spinner');
 
     constructor() {
-//        this.start = this.start.bind(this);
-        this.startFromButton = this.startFromButton.bind(this);
-        document.getElementById("startButton").onclick = this.startFromButton;
+        document.getElementById("startButton").onclick = this.startFromButton.bind(this);
     }
     public start(requestId: number) {
+        if (Number.isNaN(requestId)) {
+            return;
+        }
         this.spinner.style.display = 'block';
         this.messageHandler.clearMessages();
         

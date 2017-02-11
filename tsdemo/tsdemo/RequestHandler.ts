@@ -15,7 +15,8 @@ class HTTPClient {
     get(url: string): any {
         // Return a new promise.
         // We do all the work within the constructor callback.
-        var fakeNetworkWait = this.wait(3000 * Math.random() * this.fakeSlowNetwork);
+
+        var fakeNetworkWait = this.wait(3000 * Math.random() * this.getFakeSlowService());
 
         var requestPromise = new Promise(function (resolve, reject) {
             // Do the usual XHR stuff
@@ -49,24 +50,23 @@ class HTTPClient {
         });
     }
 
-    public constructor() {
-        let lsKey = 'fake-slow-network';
+    public getFakeSlowService() {
+
         let networkFakeDiv = <HTMLDivElement>document.querySelector('.network-fake');
         let checkbox = <HTMLInputElement>networkFakeDiv.querySelector('input');
-        this.fakeSlowNetwork = Number(localStorage.getItem(lsKey)) || 0;
-
-        networkFakeDiv.style.display = 'block';
-        checkbox.checked = !!this.fakeSlowNetwork;
-
-        checkbox.addEventListener('change', function () {
-            localStorage.setItem(lsKey, Number(checkbox.checked).toString());
-            // location.reload();
-        });
+        return checkbox.checked ? 1 : 0;
     }
+
+    getBareService(url: string): Promise<JSON> {
+        return this.get('service/' + url);
+    }
+
     getService(service: string, url: string): Promise<JSON> {
         var startTime = new Date();
+        startTask(service);
         return this.get('service/' + url).then((json: any) => {
             messageHandler.addMessage(startTime, service, json);
+            finishTask(service);
             return JSON.parse(json);
         });
     }
@@ -75,6 +75,22 @@ class HTTPClient {
     }
 }
 let hTTPClient = new HTTPClient();
+
+function setTaskClass(task, classname) {
+    (<HTMLDivElement>document.getElementById(task)).setAttribute("class", "process " + classname);
+}
+function initTask(task: string) {
+    setTaskClass(task, "inInitial");
+}
+function startTask(task: string) {
+    setTaskClass(task, "inExecution");
+}
+function finishTask(task: string) {
+    setTaskClass(task, "inFinished");
+}
+function errorTask(task: string) {
+    setTaskClass(task, "inError");
+}
 
 export class PurchaseRequest {
     purchaseRequestId: number;
@@ -99,7 +115,7 @@ export class PurchaseResponse {
 }
 
 class CustomerData {
-    public constructor(public customerId: number) { }
+    customerId: number;
 }
 class CustomerValidation {
     public toString(): string {
@@ -115,31 +131,34 @@ enum Status {
 }
 class CustomerService {
     retrieveCustomerData(customerId: number): Promise<CustomerData> {
-        return hTTPClient.getService('retrieve customer', `customer/${customerId}.json`).then(
-            data => {
-                let customerData = <CustomerData>(<any>data);
-                return new CustomerData(customerData.customerId);
-            });
+        return hTTPClient.getService('retcus', `customer/${customerId}.json`).then(
+            json => Object.assign(new CustomerData(), json));
     }
     validateCustomer(customerData: CustomerData, locationData: LocationConfig): Promise<CustomerValidation> {
-        let validation: CustomerValidation;
-        if (customerData.customerId != 10) {
-            validation = new CustomerValidation(Status.NOT_OK, "Customer validation failed");
-        } else {
-            validation = new CustomerValidation(Status.OK, "Customer OK");
-        }
-        messageHandler.addMessage(new Date(), "validate customer", validation.toString());
-        return Promise.resolve(validation);
+        startTask("valcus");
+        return hTTPClient.getBareService(`customer/${customerData.customerId}.json`).then(
+            data => {
+                let validation: CustomerValidation;
+                if (customerData.customerId != 10) {
+                    validation = new CustomerValidation(Status.NOT_OK, "Customer validation failed");
+                    errorTask("valcus");
+                } else {
+                    validation = new CustomerValidation(Status.OK, "Customer OK");
+                    finishTask("valcus");
+                }
+                messageHandler.addMessage(new Date(), "valcus", validation.toString());
+                return validation;
+            });
     }
 }
 class PurchaseRequestController {
     retrievePurchaseRequest(purchaseRequestId: number): Promise<PurchaseRequest> {
-        return hTTPClient.getService('retrieve purchase', `purchase/${purchaseRequestId}.json`).then(
+        return hTTPClient.getService('retpur', `purchase/${purchaseRequestId}.json`).then(
             json => Object.assign(new PurchaseRequest(), json));
     }
     update(purchaseRequest: PurchaseRequest, orderData: OrderData): Promise<PurchaseResponse> {
         purchaseRequest.orderId = orderData.orderId;
-        return hTTPClient.postService('update purchase', `purchase/${purchaseRequest.purchaseRequestId}.json`, purchaseRequest)
+        return hTTPClient.postService('updpur', `purchase/${purchaseRequest.purchaseRequestId}.json`, purchaseRequest)
             .then(data => new PurchaseResponse(purchaseRequest));
     }
 }
@@ -158,18 +177,20 @@ interface LocationConfigCache {
 class LocationService {
     static cache: LocationConfigCache = {};
     retrieveLocationConfig(locationId: number): Promise<LocationConfig> {
-        return hTTPClient.getService('retrieve location', `location/${locationId}.json`).then(
+        return hTTPClient.getService('retloc', `location/${locationId}.json`).then(
             json => Object.assign(new LocationConfig(), json));
     }
     getLocationConfig(locationId: number): Promise<LocationConfig> {
         let cacheValue = LocationService.cache[locationId];
         if (cacheValue) {
             messageHandler.addMessage(undefined, "location from cache", cacheValue.toString());
+            finishTask("retloc");
             return Promise.resolve(cacheValue);
         }
         return this.retrieveLocationConfig(locationId).then(
             locationConfig => {
                 LocationService.cache[locationId] = locationConfig;
+
                 return locationConfig;
             });
     }
@@ -183,17 +204,24 @@ export class TransactionValidation {
 }
 export class TransactionService {
     validate(purchaseRequest: PurchaseRequest, customerData: CustomerData): Promise<TransactionValidation> {
-        let validation;
-        if (purchaseRequest.purchaseRequestId != 12) {
-            validation = new TransactionValidation(Status.OK, '');
-        } else {
-            validation = new TransactionValidation(Status.NOT_OK, "Transfer money failed");
-        }
-        messageHandler.addMessage(new Date(), "validate transaction", validation);
-        return Promise.resolve(validation);
+        startTask("valtra");
+        return hTTPClient.getBareService(`customer/${customerData.customerId}.json`).then(
+            data => {
+                let validation;
+                if (purchaseRequest.purchaseRequestId != 12) {
+                    validation = new TransactionValidation(Status.OK, '');
+                    finishTask("valtra");
+                } else {
+                    validation = new TransactionValidation(Status.NOT_OK, "Transfer money failed");
+                    errorTask("valtra");
+                }
+                messageHandler.addMessage(new Date(), "validate transaction", validation);
+
+                return validation;
+            });
     }
     linkOrderToTransaction(purchaseRequest: PurchaseRequest): Promise<Status> {
-        messageHandler.addMessage(new Date(), "link order", '');
+        finishTask("linord");
         return Promise.resolve(Status.OK);
     }
 }
@@ -202,13 +230,14 @@ export class OrderData {
 }
 export class OrderService {
     executeOrder(purchaseRequest: PurchaseRequest): Promise<OrderData> {
-        return hTTPClient.getService('executeOrder', `order/${purchaseRequest.purchaseRequestId}.json`).then(
+        return hTTPClient.getService('exeord', `order/${purchaseRequest.purchaseRequestId}.json`).then(
             json => Object.assign(new OrderData, json));
     }
 }
 export class MailboxHandler {
     sendMessage(message: string): Promise<void> {
-        messageHandler.addMessage(new Date(), "sending message", '');
+        messageHandler.addMessage(new Date(), "sending error", '');
+        finishTask("snderr");
         return Promise.resolve();
     }
 }
@@ -225,7 +254,9 @@ abstract class BaseProcessor {
 }
 
 export class RequestHandler extends BaseProcessor {
+    tasks: Array<string> = ["retpur", "retcus", "retloc", "valcus", "valtra", "exeord", "updpur", "linord", "snderr"];
     public async process(purchaseRequestId: number): Promise<PurchaseResponse> {
+        this.tasks.forEach(initTask);
         let purchaseRequest = await this.purchaseRequestController.retrievePurchaseRequest(purchaseRequestId);
 
         let customerData = await this.customerService.retrieveCustomerData(purchaseRequest.customerId);

@@ -3,13 +3,11 @@
         stroke-dashoffset: -264;
     }
 }
-
 @keyframes spin {
     to {
         stroke-dashoffset: -264;
     }
 }
-
 .spinner circle {
     fill: none;
     stroke: slategray;
@@ -23,7 +21,6 @@
 
 html {
     font-family: Verdana, Geneva, sans-serif;
-    line-height: 1.5;
     font-size: 12px;
 }
 
@@ -33,18 +30,9 @@ h1 {
     margin: 0 0 0.5em;
 }
 
-.network-fake {
-    display: none;
-    margin-bottom: 1em;
-}
-
 input {
     padding: 4px 4px;
     vertical-align: middle;
-}
-
-table {
-    /*width: 100%;*/
 }
 
 table, th, td {
@@ -68,4 +56,80 @@ table tr:nth-child(odd) {
 table th {
     background-color: purple;
     color: white;
+}
+.diagram {
+    position: relative;
+    height:450px;
+}
+.process {
+    position: absolute;
+    border: 2px solid black;
+}
+.process > div {
+    height: 100%;
+}
+    .process p {
+        line-height: 1em;
+        padding: 0px 10px;
+    }
+
+.inInitial {
+    background: #eee; /* initial grey */
+}
+
+.inExecution {
+    background: #ffd800; /* yellow*/
+}
+
+.inFinished {
+    background: #297f34; /* green */
+}
+
+.inError {
+    background: red;
+}
+
+#retpur {
+    left: 160px;
+    top: 13px;
+}
+
+#retcus {
+    left: 230px;
+    top: 100px;
+}
+
+#retloc {
+    left: 424px;
+    top: 100px;
+}
+
+#valcus {
+    left: 359px;
+    top: 180px;
+}
+
+#valtra {
+    left: 19px;
+    top: 180px;
+}
+
+#exeord {
+    left: 180px;
+    top: 265px;
+}
+
+#updpur {
+    left: 165px;
+    top: 340px;
+}
+
+#linord {
+    left: 160px;
+    top: 410px;
+}
+
+#snderr {
+    left: 359px;
+    top: 410px;
 }
