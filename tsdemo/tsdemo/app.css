@@ -3,11 +3,24 @@
         stroke-dashoffset: -264;
     }
 }
+
 @keyframes spin {
     to {
         stroke-dashoffset: -264;
     }
 }
+
+.network-fake {
+    /*float: left;*/
+}
+.network-fake::after {
+    clear:left;
+}
+.spinner {
+   position: absolute;
+    top: 60px;
+    left: 600px;
+ }
 .spinner circle {
     fill: none;
     stroke: slategray;
@@ -57,19 +70,26 @@ table th {
     background-color: purple;
     color: white;
 }
+
 .diagram {
     position: relative;
-    height:450px;
+    height: 450px;
 }
+
+    .diagram .process {
+
+    }
+
 .process {
-    position: absolute;
     border: 2px solid black;
+            position: absolute;
 }
-.process > div {
-    height: 100%;
-}
+
+    .process > div {
+     /*background: yellow;*/   
+    }
+
     .process p {
-        line-height: 1em;
         padding: 0px 10px;
     }
 
