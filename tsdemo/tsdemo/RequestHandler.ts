@@ -63,10 +63,9 @@ class HTTPClient {
 
     getService(service: string, url: string): Promise<JSON> {
         var startTime = new Date();
-        startTask(service);
+        messageHandler.startTask(service);
         return this.get('service/' + url).then((json: any) => {
-            messageHandler.addMessage(startTime, service, json);
-            finishTask(service);
+            messageHandler.finishTask(service,json);
             return JSON.parse(json);
         });
     }
@@ -76,21 +75,7 @@ class HTTPClient {
 }
 let hTTPClient = new HTTPClient();
 
-function setTaskClass(task, classname) {
-    (<HTMLDivElement>document.getElementById(task)).setAttribute("class", "process " + classname);
-}
-function initTask(task: string) {
-    setTaskClass(task, "inInitial");
-}
-function startTask(task: string) {
-    setTaskClass(task, "inExecution");
-}
-function finishTask(task: string) {
-    setTaskClass(task, "inFinished");
-}
-function errorTask(task: string) {
-    setTaskClass(task, "inError");
-}
+
 
 export class PurchaseRequest {
     purchaseRequestId: number;
@@ -135,18 +120,17 @@ class CustomerService {
             json => Object.assign(new CustomerData(), json));
     }
     validateCustomer(customerData: CustomerData, locationData: LocationConfig): Promise<CustomerValidation> {
-        startTask("valcus");
+        messageHandler.startTask("valcus");
         return hTTPClient.getBareService(`customer/${customerData.customerId}.json`).then(
             data => {
                 let validation: CustomerValidation;
                 if (customerData.customerId === 11) {
                     validation = new CustomerValidation(Status.NOT_OK, "Customer validation failed");
-                    errorTask("valcus");
+                    messageHandler.errorTask("valcus", validation);
                 } else {
                     validation = new CustomerValidation(Status.OK, "Customer OK");
-                    finishTask("valcus");
+                    messageHandler.finishTask("valcus", validation);
                 }
-                messageHandler.addMessage(new Date(), "valcus", validation.toString());
                 return validation;
             });
     }
@@ -183,8 +167,7 @@ class LocationService {
     getLocationConfig(locationId: number): Promise<LocationConfig> {
         let cacheValue = LocationService.cache[locationId];
         if (cacheValue) {
-            messageHandler.addMessage(undefined, "location from cache", cacheValue.toString());
-            finishTask("retloc");
+            messageHandler.finishTask("retloc",cacheValue.toString());
             return Promise.resolve(cacheValue);
         }
         return this.retrieveLocationConfig(locationId).then(
@@ -204,27 +187,26 @@ export class TransactionValidation {
 }
 export class TransactionService {
     validate(purchaseRequest: PurchaseRequest, customerData: CustomerData): Promise<TransactionValidation> {
-        startTask("valtra");
+        messageHandler.startTask("valtra");
         return hTTPClient.getBareService(`customer/${customerData.customerId}.json`).then(
             data => {
                 let validation;
                 if (purchaseRequest.purchaseRequestId != 12) {
                     validation = new TransactionValidation(Status.OK, '');
-                    finishTask("valtra");
+                    messageHandler.finishTask("valtra", validation);
                 } else {
                     validation = new TransactionValidation(Status.NOT_OK, "Transfer money failed");
-                    errorTask("valtra");
+                    messageHandler.errorTask("valtra", validation);
                 }
-                messageHandler.addMessage(new Date(), "validate transaction", validation);
 
                 return validation;
             });
     }
     linkOrderToTransaction(purchaseRequest: PurchaseRequest): Promise<Status> {
-        startTask("linord");
+        messageHandler.startTask("linord");
         return hTTPClient.getBareService(`purchase/${purchaseRequest.purchaseRequestId}.json`).then(
             data => {
-                finishTask("linord");
+                messageHandler.finishTask("linord",'');
 
                 if (purchaseRequest.purchaseRequestId === 13) {
                     return Status.NOT_OK;
@@ -245,8 +227,7 @@ export class OrderService {
 }
 export class MailboxHandler {
     sendMessage(message: string): Promise<void> {
-        messageHandler.addMessage(new Date(), "sending error", '');
-        finishTask("snderr");
+        messageHandler.finishTask("snderr",'');
         return Promise.resolve();
     }
 }
@@ -265,7 +246,7 @@ abstract class BaseProcessor {
 export class RequestHandler extends BaseProcessor {
     tasks: Array<string> = ["retpur", "retcus", "retloc", "valcus", "valtra", "exeord", "updpur", "linord", "snderr"];
     public async process(purchaseRequestId: number): Promise<PurchaseResponse> {
-        this.tasks.forEach(initTask);
+
         let purchaseRequest = await this.purchaseRequestController.retrievePurchaseRequest(purchaseRequestId);
 
         let customerData = await this.customerService.retrieveCustomerData(purchaseRequest.customerId);

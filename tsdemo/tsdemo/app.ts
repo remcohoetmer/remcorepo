@@ -3,7 +3,7 @@ import {MessageHandler} from "./MessageHandler"
 import {PurchaseResponse, RequestHandler} from "./RequestHandler"
 
 class Starter {
-    messageHandler = new MessageHandler();
+    
     spinner = <HTMLDivElement>document.querySelector('.spinner');
 
     constructor() {
@@ -14,15 +14,15 @@ class Starter {
             return;
         }
         this.spinner.style.display = 'block';
-        this.messageHandler.clearMessages();
-        
+        messageHandler.clear();
+
         new RequestHandler().process(requestId).then(
             purchaseResponse => {
-                this.messageHandler.addMessage(undefined, 'result', purchaseResponse.toString());
+                messageHandler.addMessage(undefined, 'result', purchaseResponse.toString());
                 this.spinner.style.display = 'none';
             })
             .catch(err => {
-                this.messageHandler.addMessage(undefined, 'error', err);
+                messageHandler.addMessage(undefined, 'error', err);
                 this.spinner.style.display = 'none';
             });
     }
@@ -32,7 +32,10 @@ class Starter {
     }
 }
 let starter = new Starter();
+let messageHandler = new MessageHandler();
+messageHandler.drawLines();
 starter.start(123);
+
 
 /*
  {
@@ -56,3 +59,5 @@ starter.start(123);
     "customerId": 13 --> Linking failed
 }
 */
+
+
