@@ -215,11 +215,12 @@ export class TransactionService {
         messageHandler.startTask("linord");
         return hTTPClient.getBareService(`purchase/${purchaseRequest.purchaseRequestId}.json`).then(
             data => {
-                messageHandler.finishTask("linord",'');
 
                 if (purchaseRequest.purchaseRequestId === 13) {
+                    messageHandler.finishTask("linord", 'Linking NOT OK');
                     return Status.NOT_OK;
                 } else {
+                    messageHandler.finishTask("linord", 'Linking OK');
                     return Status.OK;
                 }
             });

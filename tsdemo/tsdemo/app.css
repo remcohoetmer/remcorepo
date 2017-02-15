@@ -16,6 +16,7 @@
     clear:left;
 }
 .spinner {
+    display: none;
    position: absolute;
     top: 60px;
     left: 600px;
@@ -52,7 +53,7 @@ th:nth-child(1) {
     width: 90px;
 }
 th:nth-child(2) {
-    width: 170px;
+    width: 190px;
 }
 th:nth-child(3) {
     width: 420px;

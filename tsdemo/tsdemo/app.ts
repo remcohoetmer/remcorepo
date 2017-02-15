@@ -36,7 +36,8 @@ class Starter {
 let starter = new Starter();
 let messageHandler = new MessageHandler();
 messageHandler.drawLines();
-starter.start(123);
+messageHandler.clear();
+//starter.start(123);
 
 
 /*

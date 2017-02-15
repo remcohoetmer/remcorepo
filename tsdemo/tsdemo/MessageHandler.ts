@@ -44,7 +44,7 @@ export class MessageHandler {
             y: 100,
         },
         "retloc": {
-            name: "Retrieve Location Config",
+            name: "Retrieve Location Data",
             x: 424,
             y: 100,
         },
@@ -64,7 +64,7 @@ export class MessageHandler {
             y: 265,
         },
         "updpur": {
-            name: "Update Purchase Request with Order",
+            name: "Update Purchase Request",
             x: 165,
             y: 340,
         },
@@ -108,6 +108,7 @@ export class MessageHandler {
     }
     errorTask(taskId: string, message: any): void {
         this.setTaskClass(taskId, "inError");
+        this.addMessage(null, taskId, message);
     }
     createRectangle(ctx: CanvasRenderingContext2D,
         x: number, y: number, width: number, height: number, color: string): void {
