@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Reactive Demo TypeScript</title>
+    <title>Cerios Reactive Demo</title>
     <link rel="stylesheet" href="app.css" type="text/css" />
     <script data-main="app" src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.1/require.min.js"></script>
 </head>
@@ -13,7 +13,12 @@
         <label><input type="checkbox">Fake service delay</label>
         <div id="controlDiv">
             <form name="controlForm" action="">
-                Request ID<input id="requestID" type="number" name="requestID" />
+                <select id="requestID">
+                    <option value="123">Valid Purchase</option>
+                    <option value="11">Invalid Customer</option>
+                    <option value="12">Invalid Transaction</option>
+                    <option value="13">Linking Failed</option>
+                </select>
                 <button id="startButton" type="button">Start</button>
                 <svg class="spinner" viewBox="0 0 100 100" width="20" height="20" display="inline">
                 <circle cx="50" cy="50" r="42" transform="rotate(-90,50,50)" />

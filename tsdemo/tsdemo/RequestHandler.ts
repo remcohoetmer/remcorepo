@@ -139,7 +139,7 @@ class CustomerService {
         return hTTPClient.getBareService(`customer/${customerData.customerId}.json`).then(
             data => {
                 let validation: CustomerValidation;
-                if (customerData.customerId != 10) {
+                if (customerData.customerId === 11) {
                     validation = new CustomerValidation(Status.NOT_OK, "Customer validation failed");
                     errorTask("valcus");
                 } else {
@@ -221,8 +221,17 @@ export class TransactionService {
             });
     }
     linkOrderToTransaction(purchaseRequest: PurchaseRequest): Promise<Status> {
-        finishTask("linord");
-        return Promise.resolve(Status.OK);
+        startTask("linord");
+        return hTTPClient.getBareService(`purchase/${purchaseRequest.purchaseRequestId}.json`).then(
+            data => {
+                finishTask("linord");
+
+                if (purchaseRequest.purchaseRequestId === 13) {
+                    return Status.NOT_OK;
+                } else {
+                    return Status.OK;
+                }
+            });
     }
 }
 export class OrderData {

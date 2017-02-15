@@ -43,11 +43,16 @@ starter.start(123);
  {
 	"purchaseRequestId": 12, --> Transaction Validation Error
  	"locationId": 20,
-    "customerId": 10 
+    "customerId": 12
 }
  {
 	"purchaseRequestId": 11,
 	"locationId": 11,
     "customerId": 11 --> Customer Validation Error
+}
+ {
+	"purchaseRequestId": 13,
+	"locationId": 13,
+    "customerId": 13 --> Linking failed
 }
 */
