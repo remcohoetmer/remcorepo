@@ -158,8 +158,15 @@ class LocationConfig {
 interface LocationConfigCache {
     [locationId: number]: LocationConfig;
 }
+
 class LocationService {
+
     static cache: LocationConfigCache = {};
+
+    static clearCache() {
+        LocationService.cache= {};
+    }
+
     retrieveLocationConfig(locationId: number): Promise<LocationConfig> {
         return hTTPClient.getService('retloc', `location/${locationId}.json`).then(
             json => Object.assign(new LocationConfig(), json));
@@ -178,6 +185,8 @@ class LocationService {
             });
     }
 }
+document.getElementById("clearCacheButton").onclick = LocationService.clearCache.bind(LocationService);
+
 export class TransactionValidation {
     public toString(): string {
         return `status: ${this.status}
@@ -227,8 +236,8 @@ export class OrderService {
 }
 export class MailboxHandler {
     sendMessage(message: string): Promise<void> {
-        messageHandler.finishTask("snderr",'');
-        return Promise.resolve();
+       return hTTPClient.getService('snderr', `order/13.json`).then(
+           json => undefined);
     }
 }
 abstract class BaseProcessor {
@@ -244,18 +253,20 @@ abstract class BaseProcessor {
 }
 
 export class RequestHandler extends BaseProcessor {
-    tasks: Array<string> = ["retpur", "retcus", "retloc", "valcus", "valtra", "exeord", "updpur", "linord", "snderr"];
     public async process(purchaseRequestId: number): Promise<PurchaseResponse> {
 
-        let purchaseRequest = await this.purchaseRequestController.retrievePurchaseRequest(purchaseRequestId);
+        let promise: Promise<PurchaseRequest> = this.purchaseRequestController.retrievePurchaseRequest(purchaseRequestId);
+        let purchaseRequest: PurchaseRequest = await promise;
+        let customerDataPromise =  this.customerService.retrieveCustomerData(purchaseRequest.customerId);
+        let locationConfigPromise = this.locationService.getLocationConfig(purchaseRequest.locationId);
 
-        let customerData = await this.customerService.retrieveCustomerData(purchaseRequest.customerId);
-        let locationConfig = await this.locationService.getLocationConfig(purchaseRequest.locationId);
+        let [customerData, locationConfig] =
+            await Promise.all([customerDataPromise, locationConfigPromise]);
 
-        let customerValidationpPromise = this.customerService.validateCustomer(customerData, locationConfig);
+        let customerValidationPromise = this.customerService.validateCustomer(customerData, locationConfig);
         let transactionValidationPromise = this.transactionService.validate(purchaseRequest, customerData);
         let [customerValidation, transactionValidation] =
-            await Promise.all([customerValidationpPromise, transactionValidationPromise]);
+            await Promise.all([customerValidationPromise, transactionValidationPromise]);
 
         if (customerValidation.status == Status.NOT_OK) {
             throw new Error("Validation Exception " + customerValidation.message);

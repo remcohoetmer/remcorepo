@@ -8,6 +8,8 @@ class Starter {
 
     constructor() {
         document.getElementById("startButton").onclick = this.startFromButton.bind(this);
+        document.getElementById("requestID").onchange= this.startFromButton.bind(this);
+
     }
     public start(requestId: number) {
         if (Number.isNaN(requestId)) {
@@ -18,11 +20,11 @@ class Starter {
 
         new RequestHandler().process(requestId).then(
             purchaseResponse => {
-                messageHandler.addMessage(undefined, 'result', purchaseResponse.toString());
+                messageHandler.finishTask('http', purchaseResponse);
                 this.spinner.style.display = 'none';
             })
             .catch(err => {
-                messageHandler.addMessage(undefined, 'error', err);
+                messageHandler.errorTask('http', err);
                 this.spinner.style.display = 'none';
             });
     }

@@ -27,12 +27,11 @@ export class MessageHandler {
         } catch (e) {
             taskName = taskId;
         }
-
-        row.innerHTML = `<td>${startDateValue}</td><td>${new Date().toLocaleTimeString()}</td><td>${taskName}</td><td>${message}</td>`;
+        row.innerHTML = `   <td>${new Date().toLocaleTimeString()}</td>
+                            <td>${taskName}</td>
+                            <td>${message}</td>`;
         this.messages.appendChild(row);
     }
-
-
     tasks = {
         "retpur": {
             name: "Retrieve Purchase Request",
@@ -60,7 +59,7 @@ export class MessageHandler {
             y: 180,
         },
         "exeord": {
-            name: "Execute Order",
+            name: "Execute Order ",
             x: 180,
             y: 265,
         },
@@ -75,13 +74,19 @@ export class MessageHandler {
             y: 410,
         },
         "snderr": {
-            name: "Send Error Message",
+            name: "Send Error Message ",
             x: 400,
             y: 410,
+        },
+        "http": {
+            name: "HTTP Final Response",
+            x: 165,
+            y: 475,
         }
 
     };
-    lines = [{ "x": 203, "y": 44, "rotation": 0, "id": 9, "width": 100, "height": 56 }, { "x": 232, "y": 44, "rotation": 0, "id": 10, "width": 247, "height": 56 }, { "x": 190, "y": 44, "rotation": 0, "id": 11, "width": -100, "height": 138 }, { "x": 84, "y": 214, "rotation": 0, "id": 12, "width": 125, "height": 50 }, { "x": 385.5, "y": 214, "rotation": 0, "id": 13, "width": -160, "height": 50 }, { "x": 234, "y": 296, "rotation": 0, "id": 14, "width": 0, "height": 44 }, { "x": 231, "y": 376, "rotation": 0, "id": 15, "width": 0, "height": 33 }, { "x": 350, "y": 429, "rotation": 0, "id": 16, "width": 44, "height": 0 }, { "x": 306, "y": 136, "rotation": 0, "id": 17, "width": 58, "height": 44 }, { "x": 480, "y": 136, "rotation": 0, "id": 18, "width": -53, "height": 44 }, { "x": 239.5, "y": 509, "rotation": 0, "id": 19, "width": 1, "height": 33 }];
+    lines = [{ "x": 203, "y": 44, "rotation": 0, "id": 9, "width": 100, "height": 56 }, { "x": 232, "y": 44, "rotation": 0, "id": 10, "width": 247, "height": 56 }, { "x": 190, "y": 44, "rotation": 0, "id": 11, "width": -100, "height": 138 }, { "x": 84, "y": 214, "rotation": 0, "id": 12, "width": 125, "height": 50 }, { "x": 385.5, "y": 214, "rotation": 0, "id": 13, "width": -160, "height": 50 }, { "x": 231, "y": 296, "rotation": 0, "id": 14, "width": 0, "height": 44 }, { "x": 231, "y": 376, "rotation": 0, "id": 15, "width": 0, "height": 33 }, { "x": 231, "y": 444, "rotation": 0, "id": 22, "width": 0, "height": 30 }, { "x": 350, "y": 429, "rotation": 0, "id": 16, "width": 44, "height": 0 }, { "x": 306, "y": 136, "rotation": 0, "id": 17, "width": 58, "height": 44 }, { "x": 280, "y": 136, "rotation": 0, "id": 20, "width": -170, "height": 44 }, { "x": 480, "y": 136, "rotation": 0, "id": 18, "width": -53, "height": 44 },
+        { "x": 470, "y": 136, "rotation": 0, "id": 21, "width": -340, "height": 44 }, { "x": 1000, "y": 1000, "rotation": 0, "id": 99, "width": 100, "height": 100 }];
     getColorForState(state: string): string {
         switch (state) {
             case 'inError': return "#FF8888";
@@ -104,30 +109,35 @@ export class MessageHandler {
     errorTask(taskId: string, message: any): void {
         this.setTaskClass(taskId, "inError");
     }
-    createRectangle(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, color: string): void {
+    createRectangle(ctx: CanvasRenderingContext2D,
+        x: number, y: number, width: number, height: number, color: string): void {
         ctx.fillStyle = color;
         ctx.fillRect(x, y, width, height);
-        ctx.strokeStyle = "#444444";
+
+        ctx.lineWidth = 1;
         ctx.rect(x, y, width, height);
         ctx.stroke();
-        
+
     }
 
     setTaskClass(taskId, state): void {
         let task = this.tasks[taskId];
         let ctx = this.canvas.getContext("2d");
+        ctx.strokeStyle = "#888";
 
         this.createRectangle(ctx, task.x - 8, task.y, task.name.length * 8, 35, this.getColorForState(state));
 
         ctx.fillStyle = 'black';
         ctx.fillText(task.name, task.x, task.y + 22);
+        ctx.stroke();
     }
 
     drawLines(): void {
         var ctx = this.canvas.getContext("2d");
+        ctx.strokeStyle = "black";
+       // ctx.lineCap = "round";
         for (let i = 0; i < this.lines.length; i++) {
             var line = this.lines[i];
-            ctx.strokeStyle = "black";
             ctx.beginPath();
             ctx.moveTo(line.x, line.y);
             ctx.lineTo(line.x + line.width, line.y + line.height);

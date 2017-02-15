@@ -20,19 +20,19 @@
                 <option value="12">Invalid Transaction</option>
                 <option value="13">Linking Failed</option>
             </select>
-            <button id="startButton" type="button">Start</button>
+            <button id="startButton" type="button">Restart</button>
+            <button id="clearCacheButton" type="button">Clear Cache</button>
         </form>
     </div>
     <svg class="spinner" viewBox="0 0 100 100" width="20" height="20" display="inline">
         <circle cx="50" cy="50" r="42" transform="rotate(-90,50,50)" />
     </svg>
 
-    <canvas id="taskCanvas" width="640" height="500"></canvas>
+    <canvas id="taskCanvas" width="640" height="520"></canvas>
     <table id="messages">
         <thead>
             <tr>
-                <th>Start</th>
-                <th>End</th>
+                <th>Time</th>
                 <th>Service</th>
                 <th>Message</th>
             </tr>
