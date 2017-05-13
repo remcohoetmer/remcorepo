@@ -1,9 +1,9 @@
 package nl.cerios.demo.service;
 
 // Here we have the problem that the task does not return a value
-import java.util.concurrent.CompletableFuture;
+import reactor.core.publisher.Mono;
 
-import io.reactivex.Completable;
+import java.util.concurrent.CompletableFuture;
 
 public class MailboxHandler {
 
@@ -15,8 +15,8 @@ public class MailboxHandler {
 		return CompletableFuture.runAsync(()-> sendMessage_Sync( message));
 	}
 	
-	public Completable sendMessage_Rx(String message)
+	public Mono sendMessage_Rx(String message)
 	{
-		return Completable.fromAction( ()-> sendMessage_Sync( message));
+		return Mono.fromRunnable( ()-> sendMessage_Sync( message));
 	}
 }

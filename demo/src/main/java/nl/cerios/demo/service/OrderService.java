@@ -1,8 +1,8 @@
 package nl.cerios.demo.service;
 
-import java.util.concurrent.CompletableFuture;
+import reactor.core.publisher.Mono;
 
-import io.reactivex.Single;
+import java.util.concurrent.CompletableFuture;
 
 public class OrderService {
 
@@ -17,7 +17,7 @@ public class OrderService {
 	}
 
 
-	public Single<OrderData> executeOrder_Rx(PurchaseRequest purchaseRequest) {
-		return Single.defer( ()->Single.just( executeOrder_Sync(purchaseRequest)));
+	public Mono<OrderData> executeOrder_Rx(PurchaseRequest purchaseRequest) {
+		return Mono.defer( ()->Mono.just( executeOrder_Sync(purchaseRequest)));
 	}
 }

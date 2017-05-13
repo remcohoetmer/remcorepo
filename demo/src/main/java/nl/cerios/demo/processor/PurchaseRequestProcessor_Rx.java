@@ -1,66 +1,60 @@
 package nl.cerios.demo.processor;
-import io.reactivex.Completable;
-import io.reactivex.Single;
+
 import nl.cerios.demo.http.HttpRequestData;
-import nl.cerios.demo.service.LocationConfig;
-import nl.cerios.demo.service.PurchaseRequest;
-import nl.cerios.demo.service.PurchaseResponse;
-import nl.cerios.demo.service.Status;
-import nl.cerios.demo.service.ValidationException;
+import nl.cerios.demo.service.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 
 public class PurchaseRequestProcessor_Rx extends BaseProcessor {
 
-	public Single<PurchaseResponse> process(HttpRequestData requestData)
-	{
-		Single<PurchaseRequest>  purchaseRequestSingle= purchaseRequestController
-				.retrievePurchaseRequest_Rx( requestData.getPurchaseRequestId());
-		return purchaseRequestSingle.flatMap(purchaseRequest -> {
-			return customerService.getCustomerData_Rx( purchaseRequest.getCustomerId())
-					.flatMap( customerData -> {
+  public Mono<PurchaseResponse> process(HttpRequestData requestData) {
+    Mono<PurchaseRequest> purchaseRequestSingle = purchaseRequestController
+      .retrievePurchaseRequest_Rx(requestData.getPurchaseRequestId());
+    return purchaseRequestSingle.flatMap(purchaseRequest -> {
+      return customerService.getCustomerData_Rx(purchaseRequest.getCustomerId())
+        .flatMap(customerData -> {
 
-						if (purchaseRequest.getLocationId() == null)
-							throw new ValidationException( "Invalid location");
+          if (purchaseRequest.getLocationId() == null)
+            throw new ValidationException("Invalid location");
 
-						Single<LocationConfig> locationDataSingle= locationService_Rx.getLocationConfig(purchaseRequest.getLocationId());
+          Mono<LocationConfig> locationDataSingle = locationService_Rx.getLocationConfig(purchaseRequest.getLocationId());
 
-						Completable customerValidationCompl=
-								locationDataSingle
-								.flatMap( locationData 
-										-> customerService.validateCustomer_Rx( customerData, locationData))
-								.map( customerValidation -> {
-									if (customerValidation.getStatus() != Status.OK)
-										throw new ValidationException( customerValidation.getMessage());
-									return customerValidation;
-								})
-								.toCompletable();
+          Mono customerValidationCompl =
+            locationDataSingle
+              .flatMap(locationData
+                -> customerService.validateCustomer_Rx(customerData, locationData))
+              .map(customerValidation -> {
+                if (customerValidation.getStatus() != Status.OK)
+                  throw new ValidationException(customerValidation.getMessage());
+                return customerValidation;
+              });
 
-						Completable transactionValidationCompl=
-								transactionService.validate_Rx( purchaseRequest, customerData)
-								.map( transactionValidation -> {
-									if (transactionValidation.getStatus() != Status.OK)
-										throw new ValidationException( transactionValidation.getMessage());
-									return transactionValidation;
-								})
-								.toCompletable();
+          Mono transactionValidationCompl =
+            transactionService.validate_Rx(purchaseRequest, customerData)
+              .map(transactionValidation -> {
+                if (transactionValidation.getStatus() != Status.OK)
+                  throw new ValidationException(transactionValidation.getMessage());
+                return transactionValidation;
+              });
 
-						return Completable.concatArray( customerValidationCompl, transactionValidationCompl)
-								.andThen( orderService.executeOrder_Rx( purchaseRequest))
-								.flatMap( orderData-> purchaseRequestController.update_Rx( purchaseRequest, orderData))
-								.flatMap( purchaseResponse -> {
-									return transactionService.linkOrderToTransaction_Rx(purchaseRequest)
-											.flatMap(status->{ 
-												Completable result;
-												if (status != Status.OK) {
-													// Payment and order OK, however: automatic linking failed --> manual 
-													result= mailboxHandler.sendMessage_Rx( composeLinkingFailedMessage( purchaseResponse));
-												} else {
-													result= Completable.complete();
-												}
-												return result.toSingleDefault(purchaseResponse);
-											});
-								});
-					});
-		});
-	}
+          Flux t = customerValidationCompl.concatWith(transactionValidationCompl);
+          Mono<OrderData> orderData_Mono = t.then(orderService.executeOrder_Rx(purchaseRequest));
+          Mono<PurchaseResponse> purchaseResponse_Mono = orderData_Mono.flatMap(orderData -> purchaseRequestController.update_Rx(purchaseRequest, orderData));
+          return purchaseResponse_Mono.flatMap(purchaseResponse -> {
+            return transactionService.linkOrderToTransaction_Rx(purchaseRequest)
+              .flatMap(status -> {
+                Mono result;
+                if (status != Status.OK) {
+                  // Payment and order OK, however: automatic linking failed --> manual
+                  result = mailboxHandler.sendMessage_Rx(composeLinkingFailedMessage(purchaseResponse));
+                } else {
+                  result = Mono.just(new Object());
+                }
+                return result.then(Mono.just(purchaseResponse));
+              });
+          });
+        });
+    });
+  }
 }

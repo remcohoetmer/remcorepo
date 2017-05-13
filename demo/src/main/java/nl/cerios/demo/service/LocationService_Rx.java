@@ -3,19 +3,19 @@ package nl.cerios.demo.service;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import io.reactivex.Single;
+import reactor.core.publisher.Mono;
 
 
 public class LocationService_Rx {
 	private static final Logger LOG = Logger.getLogger(LocationService_Rx.class.getName());
-	private static ConcurrentHashMap<Integer, Single<LocationConfig>> cache=
+	private static ConcurrentHashMap<Integer, Mono<LocationConfig>> cache=
 			new ConcurrentHashMap<>();
 
-	public Single<LocationConfig> getLocationConfig( final Integer locationId) throws ValidationException
+	public Mono<LocationConfig> getLocationConfig( final Integer locationId) throws ValidationException
 	{
-		Single<LocationConfig> obs = cache.get(locationId);
+		Mono<LocationConfig> obs = cache.get(locationId);
 		if (obs == null) {
-			Single<LocationConfig> new_obs= retrieveLocationConfig( locationId).cache();
+			Mono<LocationConfig> new_obs= retrieveLocationConfig( locationId).cache();
 			obs = cache.putIfAbsent(locationId, new_obs);
 			if (obs==null) {
 				return new_obs; // there was no item in the cache
@@ -32,9 +32,9 @@ public class LocationService_Rx {
 		 */
 	}
 
-	private Single<LocationConfig> retrieveLocationConfig( final Integer locationId)
+	private Mono<LocationConfig> retrieveLocationConfig( final Integer locationId)
 	{
 		LOG.info( "Obtain location "+ locationId);
-		return Single.defer( ()->Single.just( new LocationConfig(locationId)));	
+		return Mono.defer( ()-> Mono.just( new LocationConfig(locationId)));
 	}
 }

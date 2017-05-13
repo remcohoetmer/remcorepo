@@ -2,7 +2,7 @@ package nl.cerios.demo.service;
 
 import java.util.Objects;
 
-public class ValidationException extends Exception {
+public class ValidationException extends RuntimeException{
 	private static final long serialVersionUID = 1L;
 
 	public ValidationException(String string) {
