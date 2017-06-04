@@ -1,11 +1,11 @@
 package nl.Flowable;
-import java.util.List;
-import java.util.stream.Stream;
-
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.internal.operators.single.SingleToObservable;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 
 public class FlatMapLimitResearch {
@@ -77,6 +77,16 @@ public class FlatMapLimitResearch {
 		.forEach(System.out::println);
 	}
 
+	public void takeNonGrouped()
+	{
+		Observable.just( Observable.fromArray(new Integer[]{1,2,3}))
+				.flatMap(g -> g.take (2))
+				//		.flatMap(g -> Observable.just( g.lift ( new LimitOperator<Integer>(3))))
+				//.take(1)
+//				.flatMap(g -> new SingleToObservable<List<Integer>>( g.toList()))
+				.forEach(System.out::println);
+	}
+
 	public void take5()
 	{
 		Observable.just( Observable.fromArray(new Integer[]{1,2,3}))
@@ -115,6 +125,7 @@ public class FlatMapLimitResearch {
 	public static void main(String args[]) {
 		//new CustomOperator().takeSimple();
 		new FlatMapLimitResearch().takeGrouped();
+		new FlatMapLimitResearch().takeNonGrouped();
 		//		new CustomOperator().take5();
 		//		new CustomOperator().flapmapthatshit();
 
