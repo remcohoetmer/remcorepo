@@ -1,9 +1,9 @@
 package nl.cerios.demo.service;
 
+import reactor.core.publisher.Mono;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-
-import reactor.core.publisher.Mono;
 
 
 public class LocationService_Rx {
@@ -11,7 +11,7 @@ public class LocationService_Rx {
 	private static ConcurrentHashMap<Integer, Mono<LocationConfig>> cache=
 			new ConcurrentHashMap<>();
 
-	public Mono<LocationConfig> getLocationConfig( final Integer locationId) throws ValidationException
+	public Mono<LocationConfig> getLocationConfig( final Integer locationId)
 	{
 		Mono<LocationConfig> obs = cache.get(locationId);
 		if (obs == null) {

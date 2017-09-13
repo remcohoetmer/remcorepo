@@ -9,23 +9,23 @@ import nl.cerios.demo.http.HttpRequestData;
 
 public class PurchaseRequestProcessor_SyncTest extends PurchaseRequestProcessorTestBase {
 
-	@Before
-	public void setUp() throws Exception {
-		addPurchaseRequest( 10, 10, 10);
-	}
+  @Before
+  public void setUp() throws Exception {
+    addPurchaseRequest(10, 10, 10);
+  }
 
-	@Test
+  @Test
 
-	public void testHandle() {
-		HttpRequestData requestData= new HttpRequestData();
-		requestData.setPurchaseRequestId( 10);
-		
-		PurchaseHttpHandlerStub stub= new PurchaseHttpHandlerStub();
-		
-		new PurchaseRequestProcessor_Sync().process( requestData, stub);
-		
-		
-		Assert.assertEquals( new Integer( 90), stub.purchaseResponse.getPurchaseRequest().getOrderId());
-	}
+  public void testHandle() {
+    HttpRequestData requestData = new HttpRequestData();
+    requestData.setPurchaseRequestId(10);
+
+    PurchaseHttpHandlerStub stub = new PurchaseHttpHandlerStub();
+
+    new PurchaseRequestProcessor_Sync().process(requestData, stub);
+
+
+    Assert.assertEquals(new Integer(90), stub.purchaseResponse.getPurchaseRequest().getOrderId());
+  }
 
 }

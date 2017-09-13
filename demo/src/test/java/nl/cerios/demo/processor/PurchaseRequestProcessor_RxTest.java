@@ -23,11 +23,11 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
   public void testOrder() {
     HttpRequestData requestData = new HttpRequestData();
     requestData.setPurchaseRequestId(10);
-    Mono<PurchaseResponse> publisher= new PurchaseRequestProcessor_Rx().process(requestData);
+    Mono<PurchaseResponse> publisher = new PurchaseRequestProcessor_Rx().process(requestData);
 
     StepVerifier
-      .create( publisher)
-      .expectNextMatches(pr-> pr.getPurchaseRequest().getOrderId()==90)
+      .create(publisher)
+      .expectNextMatches(pr -> pr.getPurchaseRequest().getOrderId() == 90)
       .expectComplete()
       .verify();
   }

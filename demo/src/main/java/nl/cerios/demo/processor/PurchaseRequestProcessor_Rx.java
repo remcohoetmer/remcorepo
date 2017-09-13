@@ -2,6 +2,7 @@ package nl.cerios.demo.processor;
 
 import nl.cerios.demo.http.HttpRequestData;
 import nl.cerios.demo.service.*;
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -16,7 +17,7 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
         .flatMap(customerData -> {
 
           if (purchaseRequest.getLocationId() == null)
-            throw new ValidationException("Invalid location");
+            throw Exceptions.propagate(new ValidationException("Invalid location"));
 
           Mono<LocationConfig> locationDataSingle = locationService_Rx.getLocationConfig(purchaseRequest.getLocationId());
 
@@ -26,7 +27,7 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
                 -> customerService.validateCustomer_Rx(customerData, locationData))
               .map(customerValidation -> {
                 if (customerValidation.getStatus() != Status.OK)
-                  throw new ValidationException(customerValidation.getMessage());
+                  throw Exceptions.propagate(new ValidationException(customerValidation.getMessage()));
                 return customerValidation;
               });
 
@@ -34,7 +35,7 @@ public class PurchaseRequestProcessor_Rx extends BaseProcessor {
             transactionService.validate_Rx(purchaseRequest, customerData)
               .map(transactionValidation -> {
                 if (transactionValidation.getStatus() != Status.OK)
-                  throw new ValidationException(transactionValidation.getMessage());
+                  throw Exceptions.propagate(new ValidationException(transactionValidation.getMessage()));
                 return transactionValidation;
               });
 
