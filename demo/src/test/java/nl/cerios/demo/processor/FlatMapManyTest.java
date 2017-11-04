@@ -4,6 +4,7 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,14 +48,18 @@ public class FlatMapManyTest {
 
   @Test
   public void testConcat() throws InterruptedException {
-    Flux<Group> g = Flux.just(new Group(1), new Group(2), new Group(3));
+    Flux<Long> pulse = Flux.interval(Duration.ofMillis(100));
+    Flux<Group> groups = Flux.just(new Group(1), new Group(2), new Group(3));
+    Flux<Group> g = pulse.zipWith(groups).map(tuple -> tuple.getT2());
     Flux<Group> list = g.flatMap(FlatMapManyTest::f);
-      list.log("flatMap", Level.FINE).subscribe();
+    list.log("flatMap", Level.FINE).subscribe();
+//    Flux<Group> list = g.flatMap(FlatMapManyTest::f);
+    g.log("g flatMap", Level.FINE).subscribe();
 
-      Flux<Group> list2 = g.concatMap(FlatMapManyTest::f);
-      list.log("concatMap", Level.FINE).subscribe();
+    Flux<Group> list2 = g.concatMap(FlatMapManyTest::f);
+    list.log("concatMap", Level.FINE).subscribe();
 
-      Thread.sleep(2000);
-    }
-
+    Thread.sleep(2000);
   }
+
+}

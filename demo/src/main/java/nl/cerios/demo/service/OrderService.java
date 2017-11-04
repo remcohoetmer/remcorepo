@@ -17,7 +17,7 @@ public class OrderService {
 	}
 
 
-	public Mono<OrderData> executeOrder_Rx(PurchaseRequest purchaseRequest) {
+	public Mono<OrderData> executeOrder_Reactor(PurchaseRequest purchaseRequest) {
 		return Mono.defer( ()->Mono.just( executeOrder_Sync(purchaseRequest)));
 	}
 }

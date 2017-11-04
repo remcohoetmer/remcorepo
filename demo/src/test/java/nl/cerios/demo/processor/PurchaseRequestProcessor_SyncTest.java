@@ -25,7 +25,7 @@ public class PurchaseRequestProcessor_SyncTest extends PurchaseRequestProcessorT
     new PurchaseRequestProcessor_Sync().process(requestData, stub);
 
 
-    Assert.assertEquals(new Integer(90), stub.purchaseResponse.getPurchaseRequest().getOrderId());
+    Assert.assertEquals(Integer.valueOf(90), stub.purchaseResponse.getPurchaseRequest().getOrderId());
   }
 
 }

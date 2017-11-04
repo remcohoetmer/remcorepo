@@ -1,13 +1,12 @@
 package nl.cerios.demo.processor;
 
+import nl.cerios.demo.http.HttpRequestData;
+import nl.cerios.demo.service.LocationConfig;
+import nl.cerios.demo.service.LocationService_CF;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import nl.cerios.demo.http.HttpRequestData;
-import nl.cerios.demo.service.LocationConfig;
-import nl.cerios.demo.service.LocationService_CF;
 
 public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTestBase {
   @Before
@@ -36,7 +35,7 @@ public class PurchaseRequestProcessor_CFTest extends PurchaseRequestProcessorTes
     new PurchaseRequestProcessor_CF().process(requestData, stub).join();
 
     Assert.assertNotNull(stub.purchaseResponse);
-    Assert.assertEquals(new Integer(90), stub.purchaseResponse.getPurchaseRequest().getOrderId());
+    Assert.assertEquals(Integer.valueOf(90), stub.purchaseResponse.getPurchaseRequest().getOrderId());
   }
 
   @Test

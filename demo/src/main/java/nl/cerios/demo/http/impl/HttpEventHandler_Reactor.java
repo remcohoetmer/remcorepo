@@ -1,7 +1,7 @@
 package nl.cerios.demo.http.impl;
 
 import nl.cerios.demo.http.HttpRequestData;
-import nl.cerios.demo.processor.PurchaseRequestProcessor_Rx;
+import nl.cerios.demo.processor.PurchaseRequestProcessor_Reactor;
 import nl.cerios.demo.service.PurchaseResponse;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -15,8 +15,8 @@ import java.io.PrintWriter;
 import java.util.logging.Logger;
 
 @WebServlet(asyncSupported = true, value = "/WebShop_Rx", loadOnStartup = 1)
-public class HttpEventHandler_Rx extends HttpServlet {
-  private static final Logger LOG = Logger.getLogger(HttpEventHandler_Rx.class.getName());
+public class HttpEventHandler_Reactor extends HttpServlet {
+  private static final Logger LOG = Logger.getLogger(HttpEventHandler_Reactor.class.getName());
   private static final long serialVersionUID = 1L;
 
   @Override
@@ -36,7 +36,7 @@ public class HttpEventHandler_Rx extends HttpServlet {
     httpRequestData.setPurchaseRequestId(purchaseRequestId);
     ObjectMapper mapper = new ObjectMapper();
 
-    new PurchaseRequestProcessor_Rx().process(httpRequestData)
+    new PurchaseRequestProcessor_Reactor().process(httpRequestData)
       .doOnSuccess((PurchaseResponse purchaseResponse) -> {
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType("multipart/mixed;boundary=mime-multipart-boundary");

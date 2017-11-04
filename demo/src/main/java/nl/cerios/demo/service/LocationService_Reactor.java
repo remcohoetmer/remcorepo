@@ -6,8 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 
-public class LocationService_Rx {
-	private static final Logger LOG = Logger.getLogger(LocationService_Rx.class.getName());
+public class LocationService_Reactor {
+	private static final Logger LOG = Logger.getLogger(LocationService_Reactor.class.getName());
 	private static ConcurrentHashMap<Integer, Mono<LocationConfig>> cache=
 			new ConcurrentHashMap<>();
 

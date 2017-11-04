@@ -53,7 +53,7 @@ public class PurchaseRequestController {
     return CompletableFuture.supplyAsync(transportException(() -> update(purchaseRequest, orderData)));
   }
 
-  public Mono<PurchaseResponse> update_Rx(final PurchaseRequest purchaseRequest, OrderData orderData) {
+  public Mono<PurchaseResponse> update_Reactor(final PurchaseRequest purchaseRequest, OrderData orderData) {
     // postpone the computation of the value until request time, not build time
     return Mono.defer(() -> Mono.just(update(purchaseRequest, orderData)));
   }
@@ -66,7 +66,7 @@ public class PurchaseRequestController {
     return CompletableFuture.supplyAsync(transportException(() -> getPurchaseRequest(purchaseRequestId)));
   }
 
-  public Mono<PurchaseRequest> retrievePurchaseRequest_Rx(final Integer purchaseRequestId) {
+  public Mono<PurchaseRequest> retrievePurchaseRequest_Reactor(final Integer purchaseRequestId) {
     // postpone the computation of the value until request time, not build time
     return Mono.defer(() -> {
       try {

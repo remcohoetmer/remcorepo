@@ -7,50 +7,49 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
-public class PurchaseRequestProcessor_Rx extends BaseProcessor {
+public class PurchaseRequestProcessor_Reactor extends BaseProcessor {
 
   public Mono<PurchaseResponse> process(HttpRequestData requestData) {
     Mono<PurchaseRequest> purchaseRequestSingle = purchaseRequestController
-      .retrievePurchaseRequest_Rx(requestData.getPurchaseRequestId());
+      .retrievePurchaseRequest_Reactor(requestData.getPurchaseRequestId());
     return purchaseRequestSingle.flatMap(purchaseRequest -> {
-      return customerService.getCustomerData_Rx(purchaseRequest.getCustomerId())
+      return customerService.getCustomerData_Reactor(purchaseRequest.getCustomerId())
         .flatMap(customerData -> {
 
           if (purchaseRequest.getLocationId() == null)
             throw Exceptions.propagate(new ValidationException("Invalid location"));
 
-          Mono<LocationConfig> locationDataSingle = locationService_Rx.getLocationConfig(purchaseRequest.getLocationId());
+          Mono<LocationConfig> locationDataSingle = locationService_Reactor.getLocationConfig(purchaseRequest.getLocationId());
 
-          Mono customerValidationCompl =
+          Mono<Void> customerValidationCompl =
             locationDataSingle
               .flatMap(locationData
-                -> customerService.validateCustomer_Rx(customerData, locationData))
-              .map(customerValidation -> {
+                -> customerService.validateCustomer_Reactor(customerData, locationData))
+              .doOnNext(customerValidation -> {
                 if (customerValidation.getStatus() != Status.OK)
                   throw Exceptions.propagate(new ValidationException(customerValidation.getMessage()));
-                return customerValidation;
-              });
+              }).then();
 
-          Mono transactionValidationCompl =
-            transactionService.validate_Rx(purchaseRequest, customerData)
-              .map(transactionValidation -> {
+          Mono<Void> transactionValidationCompl =
+            transactionService.validate_Reactor(purchaseRequest, customerData)
+              .doOnNext(transactionValidation -> {
                 if (transactionValidation.getStatus() != Status.OK)
                   throw Exceptions.propagate(new ValidationException(transactionValidation.getMessage()));
-                return transactionValidation;
-              });
+              }).then();
 
-          Flux t = customerValidationCompl.concatWith(transactionValidationCompl);
-          Mono<OrderData> orderData_Mono = t.then(orderService.executeOrder_Rx(purchaseRequest));
-          Mono<PurchaseResponse> purchaseResponse_Mono = orderData_Mono.flatMap(orderData -> purchaseRequestController.update_Rx(purchaseRequest, orderData));
+          Flux<Void> t = customerValidationCompl.concatWith(transactionValidationCompl);
+          Mono<OrderData> orderData_Mono = t.then(orderService.executeOrder_Reactor(purchaseRequest));
+          Mono<PurchaseResponse> purchaseResponse_Mono = orderData_Mono.flatMap(orderData
+            -> purchaseRequestController.update_Reactor(purchaseRequest, orderData));
           return purchaseResponse_Mono.flatMap(purchaseResponse -> {
-            return transactionService.linkOrderToTransaction_Rx(purchaseRequest)
+            return transactionService.linkOrderToTransaction_Reactor(purchaseRequest)
               .flatMap(status -> {
-                Mono result;
+                Mono<Void> result;
                 if (status != Status.OK) {
                   // Payment and order OK, however: automatic linking failed --> manual
-                  result = mailboxHandler.sendMessage_Rx(composeLinkingFailedMessage(purchaseResponse));
+                  result = mailboxHandler.sendMessage_Reactor(composeLinkingFailedMessage(purchaseResponse));
                 } else {
-                  result = Mono.just(new Object());
+                  result = Mono.empty();
                 }
                 return result.then(Mono.just(purchaseResponse));
               });

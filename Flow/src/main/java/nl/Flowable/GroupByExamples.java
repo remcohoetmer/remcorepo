@@ -1,11 +1,11 @@
 package nl.Flowable;
-import java.util.Arrays;
-import java.util.List;
-
 import io.reactivex.Observable;
 import io.reactivex.internal.operators.maybe.MaybeToObservable;
 import io.reactivex.internal.operators.single.SingleToObservable;
 import io.reactivex.observables.GroupedObservable;
+
+import java.util.Arrays;
+import java.util.List;
 
 
 public class GroupByExamples {
@@ -17,15 +17,15 @@ public class GroupByExamples {
 		.flatMap(g -> getSublist(g))
 		.forEach(System.out::println);
 	}
-	
-	/* Probleem: 
+
+	/* Probleem:
 	 * Je wilt van de 2 lijsten de eerste 11 elementem. De rest wil je negeren. Oplossing de flatmap.
 	 * Maar: nadat de flatMap de waarden van de 1e observable heeft verwerkt (take()),
 	 * staat deze nog open dwz is in staat om te leveren. De map wordt nogmaals toegepast, zolang de producer niet uitgeput is.
 	 * De vraag is nu hoe je een flatMap kan maken die enkel de eerste 11 elementen van de observable leest, zonder de rest te verwerken.
 	 * Wat je hiervan leert is het pull-mechanisme van RxJava: je kan de stroom niet controleren op een impreatieve wijze. Je bent overgeleverd aan de werking van de componenten (flatMap).
 	 * Eenvoudige oplossing: je weet dat je maar 2 lijsten terug moet krijgen --> je kan dus een take doen op de elementen. Daarna zal de observable de stream (beter gezegd: de subscription) cancelen.
-	 * 
+	 *
 	 */
 	public void take11()
 	{
@@ -115,6 +115,13 @@ public class GroupByExamples {
                 .map(g ->  g.toList()).toBlocking().forEach(System.out::println);
 		 */
 	}
+  public void take50()
+  {
+    Observable.range(1, 40)
+      .groupBy(n -> n % 2 == 0)
+      .flatMap(g -> getSublist(g))
+      .forEach(System.out::println);
+  }
 	public static void main(String args[]) {
 		new GroupByExamples().take11();
 

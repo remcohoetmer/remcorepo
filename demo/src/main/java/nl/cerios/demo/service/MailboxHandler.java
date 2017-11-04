@@ -15,7 +15,7 @@ public class MailboxHandler {
 		return CompletableFuture.runAsync(()-> sendMessage_Sync( message));
 	}
 	
-	public Mono sendMessage_Rx(String message)
+	public Mono<Void> sendMessage_Reactor(String message)
 	{
 		return Mono.fromRunnable( ()-> sendMessage_Sync( message));
 	}

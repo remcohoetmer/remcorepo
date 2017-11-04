@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 
-public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTestBase {
+public class PurchaseRequestProcessor_ReactorTest extends PurchaseRequestProcessorTestBase {
   @Before
   public void setUp() throws Exception {
     addPurchaseRequest(10, 10, 10);
@@ -23,7 +23,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
   public void testOrder() {
     HttpRequestData requestData = new HttpRequestData();
     requestData.setPurchaseRequestId(10);
-    Mono<PurchaseResponse> publisher = new PurchaseRequestProcessor_Rx().process(requestData);
+    Mono<PurchaseResponse> publisher = new PurchaseRequestProcessor_Reactor().process(requestData);
 
     StepVerifier
       .create(publisher)
@@ -37,7 +37,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
   public void testInvalidCustomer() {
     HttpRequestData requestData = new HttpRequestData();
     requestData.setPurchaseRequestId(2);
-    Mono<PurchaseResponse> publisher = new PurchaseRequestProcessor_Rx().process(requestData);
+    Mono<PurchaseResponse> publisher = new PurchaseRequestProcessor_Reactor().process(requestData);
 
     StepVerifier
       .create(publisher)
@@ -51,7 +51,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
     HttpRequestData requestData = new HttpRequestData();
     requestData.setPurchaseRequestId(0);
 
-    Mono<PurchaseResponse> publisher = new PurchaseRequestProcessor_Rx().process(requestData);
+    Mono<PurchaseResponse> publisher = new PurchaseRequestProcessor_Reactor().process(requestData);
 
     StepVerifier
       .create(publisher)
@@ -64,7 +64,7 @@ public class PurchaseRequestProcessor_RxTest extends PurchaseRequestProcessorTes
     HttpRequestData requestData = new HttpRequestData();
     requestData.setPurchaseRequestId(13);
 
-    Mono<PurchaseResponse> publisher = new PurchaseRequestProcessor_Rx().process(requestData);
+    Mono<PurchaseResponse> publisher = new PurchaseRequestProcessor_Reactor().process(requestData);
 
     StepVerifier
       .create(publisher)

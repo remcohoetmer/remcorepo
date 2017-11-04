@@ -30,11 +30,11 @@ TransactionService {
     return CompletableFuture.supplyAsync(() -> linkOrderToTransaction_Sync(purchaseRequest));
   }
 
-  public Mono<TransactionValidation> validate_Rx(PurchaseRequest purchaseRequest, CustomerData customerData) {
+  public Mono<TransactionValidation> validate_Reactor(PurchaseRequest purchaseRequest, CustomerData customerData) {
     return Mono.defer(() -> Mono.just(validate_Sync(purchaseRequest, customerData)));
   }
 
-  public Mono<Status> linkOrderToTransaction_Rx(PurchaseRequest purchaseRequest) {
+  public Mono<Status> linkOrderToTransaction_Reactor(PurchaseRequest purchaseRequest) {
     return Mono.defer(() -> Mono.just(linkOrderToTransaction_Sync(purchaseRequest)));
   }
 }

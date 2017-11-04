@@ -48,7 +48,7 @@ public class CustomerService {
         return CompletableFuture.supplyAsync(() -> validateCustomer_Sync(customerData, locationData));
     }
 
-    public Mono<CustomerData> getCustomerData_Rx(Integer customerId) {
+    public Mono<CustomerData> getCustomerData_Reactor(Integer customerId) {
         return Mono.defer(() -> {
             try {
                 return Mono.just(retrieveCustomerData_Sync(customerId));
@@ -58,7 +58,7 @@ public class CustomerService {
         });
     }
 
-    public Mono<CustomerValidation> validateCustomer_Rx(CustomerData customerData, LocationConfig locationData) {
+    public Mono<CustomerValidation> validateCustomer_Reactor(CustomerData customerData, LocationConfig locationData) {
         return Mono.defer(() -> Mono.just(validateCustomer_Sync(customerData, locationData)));
     }
 
