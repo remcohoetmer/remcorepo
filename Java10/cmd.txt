@@ -1,3 +1,6 @@
-~/jdk-10/bin/javac -d out/production/Java10 src/nl/cerios/java10/*.java
+~/opt/jdk-11/bin/javac -d out/production/Java10 src/nl/cerios/java11/*.java
 
-~/jdk-10/bin/java -classpath out/production/Java10 nl.cerios.java10.Example
+~/opt/jdk-11/bin/java -classpath out/production/Java10 nl.cerios.java11.Example
+
+~/opt/jdk-11/bin/javac -d out/production/Java10 --add-modules=jdk.incubator.httpclient src/nl/cerios/java11/*.java
+~/opt/jdk-11/bin/java -classpath out/production/Java10 --add-modules=jdk.incubator.httpclient nl.cerios.java11.Client

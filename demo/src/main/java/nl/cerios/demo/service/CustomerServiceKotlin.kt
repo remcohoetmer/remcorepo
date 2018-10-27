@@ -6,7 +6,7 @@ import java.util.logging.Logger
 class CustomerServiceKotlin {
 
     @Throws(ValidationException::class)
-    suspend fun retrieveCustomerData(customerId: Int?): CustomerData {
+    suspend fun retrieveCustomerData(customerId: Int): CustomerData {
         return CustomerData(customerId)
     }
 
@@ -14,7 +14,7 @@ class CustomerServiceKotlin {
         LOG.info(Thread.currentThread().name)
         val validation = CustomerValidation()
         var status = Status.OK
-        if (customerData.customerId !== locationData.locationId) {
+        if (customerData.customerId != locationData.locationId) {
             status = Status.NOT_OK
         }
         validation.status = status

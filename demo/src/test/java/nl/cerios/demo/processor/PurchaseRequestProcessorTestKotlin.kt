@@ -31,8 +31,7 @@ class PurchaseRequestProcessorTestKotlin : PurchaseRequestProcessorTestBaseKotli
         requestData.purchaseRequestId = 13
         try {
 
-
-            val purchaseResponse = PurchaseRequestProcessorKotlin().process(requestData)
+            PurchaseRequestProcessorKotlin().process(requestData)
 
             throw Exception("test failed")
         } catch (cv: ValidationException) {
