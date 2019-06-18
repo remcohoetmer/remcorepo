@@ -1,13 +1,13 @@
 package nl.cerios.demo.processor;
 
-import java.util.logging.Logger;
-
 import nl.cerios.demo.http.PurchaseHttpHandler;
 import nl.cerios.demo.service.PurchaseRequest;
 import nl.cerios.demo.service.PurchaseRequestController;
 import nl.cerios.demo.service.PurchaseResponse;
 
-public abstract class PurchaseRequestProcessorTestBase
+import java.util.logging.Logger;
+
+ abstract class PurchaseRequestProcessorTestBase
 {
 	private static final Logger LOG = Logger.getLogger(PurchaseRequestProcessorTestBase.class.getName());
 	static class PurchaseHttpHandlerStub implements PurchaseHttpHandler {

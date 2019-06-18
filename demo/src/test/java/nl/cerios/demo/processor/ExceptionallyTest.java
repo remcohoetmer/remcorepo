@@ -1,12 +1,12 @@
 package nl.cerios.demo.processor;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ExceptionallyTest {
+class ExceptionallyTest {
   @Test
-  public void exceptionally() throws InterruptedException {
+  void exceptionally() throws InterruptedException {
     CompletableFuture<String> future = new CompletableFuture<>();
     future.complete("trigger");
 

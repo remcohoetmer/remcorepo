@@ -1,13 +1,13 @@
 package nl.cerios.demo.processor
 
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import nl.cerios.demo.http.HttpRequestData
 import nl.cerios.demo.service.ValidationException
-import org.junit.Assert
-import org.junit.Before
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeAll
 
 class PurchaseRequestProcessorTestKotlin : PurchaseRequestProcessorTestBaseKotlin() {
-    @Before
+    @BeforeAll
     @Throws(Exception::class)
     fun setUp() {
         addPurchaseRequest(10, 10, 10)
@@ -21,7 +21,7 @@ class PurchaseRequestProcessorTestKotlin : PurchaseRequestProcessorTestBaseKotli
 
         val purchaseResponse = PurchaseRequestProcessorKotlin().process(requestData)
         println(purchaseResponse)
-        Assert.assertEquals(Integer.valueOf(90), purchaseResponse.purchaseRequest.orderId)
+        assertEquals(Integer.valueOf(90), purchaseResponse.purchaseRequest.orderId)
 
     }
 
@@ -35,7 +35,7 @@ class PurchaseRequestProcessorTestKotlin : PurchaseRequestProcessorTestBaseKotli
 
             throw Exception("test failed")
         } catch (cv: ValidationException) {
-            Assert.assertEquals("Customer validation failed", cv.message)
+            assertEquals("Customer validation failed", cv.message)
         }
 
     }
